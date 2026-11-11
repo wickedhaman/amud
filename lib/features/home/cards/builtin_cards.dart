@@ -10,8 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/adaptive.dart';
 import '../../../core/format.dart';
 import '../../../core/l10n.dart';
-import '../../gemara/gemara_home_screen.dart' show DafVideoButton, dafOfAmud, learningPath;
-import '../../gemara/study_book.dart' show dafYomiPlace;
+import '../../gemara/gemara_home_screen.dart' show learningPath;
 import '../../../core/providers.dart';
 import '../../../core/settings.dart';
 import '../../../core/split_row.dart';
@@ -29,7 +28,6 @@ import '../../zmanim/zman_catalog.dart';
 import '../card_registry.dart';
 import '../today.dart';
 import '../../torah/shnayim_mikra_screen.dart';
-import '../../torah/torah_screen.dart' show kitzurTarget;
 import 'card_frame.dart';
 
 void registerBuiltInCards(CardRegistry r) {
@@ -563,21 +561,7 @@ class _LearningCard extends ConsumerWidget {
                 ]),
               ),
             );
-            // Daf Yomi's and Kitzur Yomi's video shiur, beside them.
-            final video = switch (name) {
-              'dafYomi' => switch (dafYomiPlace(t.civil)) {
-                  final daf? when dafOfAmud(daf.unit) != null => DafVideoButton(tractate: daf.book, daf: dafOfAmud(daf.unit)!),
-                  _ => null,
-                },
-              'kitzurShulchanAruch' => switch (ev is KitzurShulchanAruchEvent ? kitzurTarget(ev) : null) {
-                  final k? => DafVideoButton.kitzur(siman: k.siman, seif: k.from),
-                  null => null,
-                },
-              _ => null,
-            };
-            if (video == null) return entry;
-            // Beside the name where both fit; on a narrow card, under it.
-            return SplitRow(crossAxisAlignment: CrossAxisAlignment.center, children: [entry, video]);
+            return entry;
           }),
       ]),
     );
