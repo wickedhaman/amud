@@ -25,54 +25,132 @@ import 'features/integrations/seasonal_windows.dart';
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (!kIsWeb) AppLinks(); // Capture a cold-start link before asynchronous initialization.
-  initHebcal(); // IANA tz database + learning schedules
-  final storage = await Storage.open();
-  Content.attach(storage); // Content updates downloaded last time, before anything reads a text.
+  runApp(_Bootstrap(args: args));
+}
 
-  // Cards are modular: each feature registers its card types here.
-  final registry = CardRegistry();
-  registerBuiltInCards(registry);
-  registerSeasonalCards(registry);
+/// Shows a first frame immediately, then opens storage and fonts in the
+/// background. A slow disk or font load must never leave the phone blank.
+class _Bootstrap extends StatefulWidget {
+  final List<String> args;
+  const _Bootstrap({required this.args});
 
-  final initialLink = args.map(Uri.tryParse).whereType<Uri>().map(routeFromLink).whereType<String>().firstOrNull;
-  final container = ProviderContainer(overrides: [
-    storageProvider.overrideWithValue(storage),
-    cardRegistryProvider.overrideWithValue(registry),
-  ]);
-  await container.read(fontsProvider.notifier).loadAll();
+  @override
+  State<_Bootstrap> createState() => _BootstrapState();
+}
 
-  final onFlutterError = FlutterError.onError;
-  FlutterError.onError = (details) {
-    analytics.error(details.exception, fatal: false);
-    onFlutterError?.call(details);
-  };
-  PlatformDispatcher.instance.onError = (error, stack) {
-    analytics.error(error, fatal: true);
-    return false;
-  };
+class _BootstrapState extends State<_Bootstrap> {
+  Widget? _ready;
+  Object? _error;
+  ProviderContainer? _container;
+  bool _starting = false;
 
-  runApp(UncontrolledProviderScope(container: container, child: const PlatformRuntime(child: _Lifecycle(child: SiddurApp()))));
-  if (initialLink != null) {
-    WidgetsBinding.instance.addPostFrameCallback((_) => openFromOutside(container.read(routerProvider), initialLink));
+  @override
+  void initState() {
+    super.initState();
+    // Let the loading screen paint before doing any initialization work.
+    WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_initialize()));
   }
 
-  // Analytics starts after the first frame too; events before then wait.
-  final settings = container.read(settingsProvider);
-  analytics.trackScreens(container.read(routerProvider));
-  analytics.event('app_launch', {'fonts': container.read(fontsProvider).length});
-  unawaited(analytics.init(settings, storage));
+  Future<void> _initialize() async {
+    if (_starting || _ready != null) return;
+    _starting = true;
+    if (mounted) setState(() => _error = null);
+    try {
+      if (!kIsWeb) AppLinks();
+      initHebcal();
+      final storage = await Storage.open();
+      Content.attach(storage);
 
-  // Plan notifications after first frame (never blocks startup).
-  Future<void>.delayed(const Duration(seconds: 1), () => container.read(alertSchedulerProvider).reschedule());
-  // Cross-device sync (opt-in): reading the provider starts watching for
-  // changes; the first sync waits for the app to settle.
-  container.read(syncProvider);
-  Future<void>.delayed(const Duration(seconds: 3), () => container.read(syncProvider.notifier).syncNow());
-  // Look for a new release in the background (daily; Android/desktop).
-  Future<void>.delayed(const Duration(seconds: 5), () => container.read(updateProvider.notifier).autoCheck());
-  // Content fixes between releases (texts, rules), in use from the next start.
-  Future<void>.delayed(const Duration(seconds: 8), () => checkContentUpdates(storage));
+      final registry = CardRegistry();
+      registerBuiltInCards(registry);
+      registerSeasonalCards(registry);
+
+      final initialLink = widget.args.map(Uri.tryParse).whereType<Uri>().map(routeFromLink).whereType<String>().firstOrNull;
+      final container = ProviderContainer(overrides: [
+        storageProvider.overrideWithValue(storage),
+        cardRegistryProvider.overrideWithValue(registry),
+      ]);
+      await container.read(fontsProvider.notifier).loadAll();
+
+      final onFlutterError = FlutterError.onError;
+      FlutterError.onError = (details) {
+        analytics.error(details.exception, fatal: false);
+        onFlutterError?.call(details);
+      };
+      PlatformDispatcher.instance.onError = (error, stack) {
+        analytics.error(error, fatal: true);
+        return false;
+      };
+
+      if (!mounted) {
+        container.dispose();
+        return;
+      }
+      _container = container;
+      setState(() => _ready = UncontrolledProviderScope(
+            container: container,
+            child: const PlatformRuntime(child: _Lifecycle(child: SiddurApp())),
+          ));
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (initialLink != null) openFromOutside(container.read(routerProvider), initialLink);
+        final settings = container.read(settingsProvider);
+        analytics.trackScreens(container.read(routerProvider));
+        analytics.event('app_launch', {'fonts': container.read(fontsProvider).length});
+        unawaited(analytics.init(settings, storage));
+        Future<void>.delayed(const Duration(seconds: 1), () {
+          if (mounted) container.read(alertSchedulerProvider).reschedule();
+        });
+        container.read(syncProvider);
+        Future<void>.delayed(const Duration(seconds: 3), () {
+          if (mounted) container.read(syncProvider.notifier).syncNow();
+        });
+        Future<void>.delayed(const Duration(seconds: 5), () {
+          if (mounted) container.read(updateProvider.notifier).autoCheck();
+        });
+        Future<void>.delayed(const Duration(seconds: 8), () {
+          if (mounted) checkContentUpdates(storage);
+        });
+      });
+    } catch (e, stack) {
+      debugPrint('Amud startup: $e\\n$stack');
+      if (mounted) setState(() => _error = e);
+    } finally {
+      _starting = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _container?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_ready != null) return _ready!;
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: _error == null
+                ? const Column(mainAxisSize: MainAxisSize.min, children: [
+                    SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5)),
+                    SizedBox(height: 14),
+                    Text('Loading Amud'),
+                  ])
+                : Column(mainAxisSize: MainAxisSize.min, children: [
+                    const Text('Amud could not finish starting.'),
+                    const SizedBox(height: 12),
+                    FilledButton(onPressed: () => unawaited(_initialize()), child: const Text('Try again')),
+                  ]),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Re-plans notifications when the app returns to the foreground (dates,
