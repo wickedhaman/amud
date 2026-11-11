@@ -44,7 +44,11 @@ const keypadMenuKeys = [
   SingleActivator(LogicalKeyboardKey(LogicalKeyboardKey.androidPlane | 1)),
 ];
 const keypadBackKeys = [
+  // SOFT_RIGHT is the common LG/feature-phone Back key. Some firmware
+  // forwards the physical Android BACK or END_CALL key to Flutter instead.
   SingleActivator(LogicalKeyboardKey(LogicalKeyboardKey.androidPlane | 2)),
+  SingleActivator(LogicalKeyboardKey(LogicalKeyboardKey.androidPlane | 4)),
+  SingleActivator(LogicalKeyboardKey(LogicalKeyboardKey.androidPlane | 6)),
 ];
 
 /// Opens the menu of the page that has focus, or the app's own.
