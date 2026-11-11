@@ -20,6 +20,7 @@ const _channel = AndroidNotificationDetails(
   importance: Importance.high,
   priority: Priority.high,
   category: AndroidNotificationCategory.reminder,
+  icon: '@drawable/ic_stat_zmanim',
 );
 const _details = NotificationDetails(
   android: _channel,
@@ -53,7 +54,7 @@ class _NativeBackend implements NotificationBackend {
   Future<void> init() async {
     if (_ready) return;
     await _plugin.initialize(const InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      android: AndroidInitializationSettings('@drawable/ic_stat_zmanim'),
       iOS: DarwinInitializationSettings(
         requestAlertPermission: false,
         requestBadgePermission: false,
