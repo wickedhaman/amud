@@ -296,6 +296,12 @@ class _KeypadLayerState extends ConsumerState<KeypadLayer> {
     final app = KeyedSubtree(key: _app, child: widget.child);
     if (!on) return app;
     final focusMode = ref.watch(focusModeProvider);
+    // Material sliders use this mode to map left/right to value changes,
+    // while leaving up/down available for focus traversal.
+    final directionalApp = MediaQuery(
+      data: MediaQuery.of(context).copyWith(navigationMode: NavigationMode.directional),
+      child: app,
+    );
     return Shortcuts(
       shortcuts: {
         for (final k in keypadMenuKeys) k: const KeypadMenuIntent(),
@@ -326,7 +332,7 @@ class _KeypadLayerState extends ConsumerState<KeypadLayer> {
             child: MediaQuery.removePadding(
               context: context,
               removeBottom: !focusMode,
-              child: _FocusRing(child: app),
+              child: _FocusRing(child: directionalApp),
             ),
           ),
         ]),
