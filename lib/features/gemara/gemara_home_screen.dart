@@ -673,6 +673,3 @@ class _DafTile extends ConsumerWidget {
   }
 }
 
-/// The daf of a Bavli amud ("50b" → 50); null for a unit that isn't one.
-int? dafOfAmud(String amud) => int.tryParse(RegExp(r'^(\d+)[ab]$').firstMatch(amud)?[1] ?? '');
-
