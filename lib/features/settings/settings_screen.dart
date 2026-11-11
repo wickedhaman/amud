@@ -48,7 +48,8 @@ class SettingsScreen extends ConsumerWidget {
     final allOpen = _sections.every(s.expandedSettings.contains);
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.tr('Settings')),
+        toolbarHeight: 48,
+        title: Text(context.tr('Settings'), style: Theme.of(context).textTheme.titleMedium),
         actions: [
           IconButton(
             tooltip: context.tr(allOpen ? 'Collapse all' : 'Expand all'),
@@ -57,8 +58,8 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(PageSearchBar.height),
-          child: PageSearchBar(page: 'settings', hint: context.tr('Search settings')),
+          preferredSize: const Size.fromHeight(PageSearchBar.compactHeight),
+          child: PageSearchBar(page: 'settings', hint: context.tr('Search settings'), compact: true),
         ),
       ),
       body: ListFilter(
