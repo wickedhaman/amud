@@ -64,15 +64,6 @@ class MainActivity : FlutterActivity() {
         setReaderDnd(false)
         super.onDestroy()
     }
-    /// Whether a hardware decoder plays 1080p HEVC, for the daf videos' HEVC
-    /// stream (software decoders are too slow on most phones).
-    private fun hasHardwareHevc(): Boolean = android.media.MediaCodecList(android.media.MediaCodecList.REGULAR_CODECS).codecInfos.any { info ->
-        !info.isEncoder &&
-            info.supportedTypes.any { it.equals("video/hevc", ignoreCase = true) } &&
-            (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.isHardwareAccelerated
-             else !info.name.startsWith("OMX.google.") && !info.name.startsWith("c2.android.")) &&
-            runCatching { info.getCapabilitiesForType("video/hevc").videoCapabilities.areSizeAndRateSupported(1920, 1080, 30.0) }.getOrDefault(false)
-    }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
@@ -83,7 +74,6 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "amud/integrations").setMethodCallHandler { call, result ->
             when (call.method) {
                 "setReaderDnd" -> result.success(setReaderDnd(call.arguments == true))
-                "hevcDecoder" -> result.success(hasHardwareHevc())
                 // A flip phone: no touch screen, driven by its keypad.
                 "keypadDevice" -> result.success(
                     !packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_TOUCHSCREEN) ||
