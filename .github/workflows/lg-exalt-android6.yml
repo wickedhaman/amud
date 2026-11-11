@@ -5,6 +5,8 @@ on:
     branches: [lg-exalt-android6-dpad]
     paths:
       - 'lib/**'
+      - 'test/**'
+      - 'assets/**'
       - 'android/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
