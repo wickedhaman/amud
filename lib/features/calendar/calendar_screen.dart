@@ -128,6 +128,7 @@ class CalendarView extends ConsumerWidget {
                 final isSel = pd == selected;
                 final isToday = pd == today;
                 return InkWell(
+                  autofocus: isSel,
                   borderRadius: BorderRadius.circular(10),
                   onTap: () => ref.read(_selectedProvider.notifier).state = pd,
                   child: Container(
