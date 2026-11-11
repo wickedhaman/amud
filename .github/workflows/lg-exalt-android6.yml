@@ -14,10 +14,6 @@ on:
       - '.github/workflows/lg-exalt-android6.yml'
   workflow_dispatch:
 
-concurrency:
-  group: lg-exalt-android6-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
