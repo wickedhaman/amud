@@ -698,32 +698,6 @@
    ]
   },
   {
-   "title": "Rabbi Sacks on Siddur",
-   "heTitle": "פירוש הרב זקס על הסידור",
-   "slug": "rabbi_sacks_on_siddur_fb2cf7",
-   "categories": [
-    "Liturgy",
-    "Siddur"
-   ],
-   "index": "rabbi_sacks_on_siddur_fb2cf7__index.json.gz",
-   "versions": [
-    {
-     "language": "en",
-     "actualLanguage": "en",
-     "versionTitle": "English Edition; Koren Publishers Jerusalem, 2017",
-     "versionTitleInHebrew": "",
-     "license": "CC-BY-NC",
-     "versionSource": "https://korenpub.co.il/collections/shalem-siddur/products/koren-shalem-siddurhardcoverstandardashkenaz",
-     "isPrimary": true,
-     "priority": null,
-     "direction": "ltr",
-     "segments": 434,
-     "file": "rabbi_sacks_on_siddur_fb2cf7__en__english_edition_koren_publishers_jerusalem_2017_153f4f.json.gz",
-     "bytes": 118602
-    }
-   ]
-  },
-  {
    "title": "Shabbat Siddur Sefard Linear",
    "heTitle": "סידור ספרד לשבת",
    "slug": "shabbat_siddur_sefard_linear_e1f42a",
