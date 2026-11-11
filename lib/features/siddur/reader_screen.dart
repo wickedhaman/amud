@@ -222,12 +222,14 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with FocusModeReade
 
     final title = node == null ? context.term(widget.book) : context.prayerTitle(s, node.en, node.he);
     final bar = AppBar(
+        toolbarHeight: ref.watch(keypadModeProvider) ? 48 : null,
+        titleSpacing: ref.watch(keypadModeProvider) ? 8 : null,
         title: Builder(builder: (context) {
           final heTitle = context.prayerTitleIsHebrew(s);
           final sub = node == null ? null : context.prayerSubtitle(s, node.en, node.he);
           return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(title, overflow: TextOverflow.ellipsis, style: node != null && heTitle ? TextStyle(fontFamily: s.hebrewFont) : null),
-            if (sub != null)
+            if (sub != null && !ref.watch(keypadModeProvider))
               Text(sub,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(fontFamily: heTitle ? null : s.hebrewFont),
