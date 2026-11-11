@@ -18,10 +18,21 @@ class CalendarScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-        appBar: AppBar(title: Text(context.tr('Calendar')), actions: [
-          TextButton(onPressed: () => resetCalendar(ref), child: Text(context.tr('Today'))),
-        ]),
-        body: ListView(padding: pagePadding(context, const EdgeInsets.fromLTRB(12, 0, 12, 32)), children: const [CalendarView()]),
+        appBar: AppBar(
+          toolbarHeight: 48,
+          title: Text(context.tr('Calendar'), style: Theme.of(context).textTheme.titleMedium),
+          actions: [
+            IconButton(
+              tooltip: context.tr('Today'),
+              visualDensity: VisualDensity.compact,
+              constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+              iconSize: 20,
+              onPressed: () => resetCalendar(ref),
+              icon: const Icon(Icons.today_outlined),
+            ),
+          ],
+        ),
+        body: ListView(padding: pagePadding(context, const EdgeInsets.fromLTRB(6, 0, 6, 12)), children: const [CalendarView(compact: true)]),
       );
 }
 
@@ -80,14 +91,20 @@ class CalendarView extends ConsumerWidget {
 
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Row(children: [
-          IconButton(onPressed: () => shift(-1), icon: const Icon(Icons.chevron_left)),
+          IconButton(visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
+              constraints: compact ? const BoxConstraints.tightFor(width: 36, height: 36) : null,
+              iconSize: compact ? 20 : 24,
+              onPressed: () => shift(-1), icon: const Icon(Icons.chevron_left)),
           Expanded(
             child: Column(children: [
               Text(formatMonth(ym.$1, ym.$2), style: theme.textTheme.titleLarge),
               Text(hebRange, style: theme.textTheme.bodySmall),
             ]),
           ),
-          IconButton(onPressed: () => shift(1), icon: const Icon(Icons.chevron_right)),
+          IconButton(visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
+              constraints: compact ? const BoxConstraints.tightFor(width: 36, height: 36) : null,
+              iconSize: compact ? 20 : 24,
+              onPressed: () => shift(1), icon: const Icon(Icons.chevron_right)),
         ]),
         Row(children: [
           for (final d in const ['S', 'M', 'T', 'W', 'T', 'F', 'Sh'])
@@ -98,7 +115,7 @@ class CalendarView extends ConsumerWidget {
           crossAxisCount: 7,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: compact ? 0.9 : 0.8,
+          childAspectRatio: compact ? 1.05 : 0.8,
           children: [
             for (var i = 0; i < lead; i++) const SizedBox.shrink(),
             for (var d = 1; d <= days; d++)
