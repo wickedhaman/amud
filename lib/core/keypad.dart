@@ -270,8 +270,8 @@ class _KeypadLayerState extends ConsumerState<KeypadLayer> {
     super.dispose();
   }
 
-  /// A one-line text field (a search box) would keep up and down for its
-  /// caret, and the d-pad would be stuck in it: they move on instead.
+  /// Text inputs must not trap the d-pad: up and down move focus out of
+  /// single-line or multiline editors instead of moving the text caret.
   KeyEventResult _leaveField(KeyEvent e) {
     if (e is KeyUpEvent || !mounted || !ref.read(keypadModeProvider)) return KeyEventResult.ignored;
     final direction = switch (e.logicalKey) {
@@ -281,7 +281,7 @@ class _KeypadLayerState extends ConsumerState<KeypadLayer> {
     };
     final c = primaryFocus?.context;
     if (direction == null || c == null || !c.mounted) return KeyEventResult.ignored;
-    if (c.findAncestorWidgetOfExactType<EditableText>()?.maxLines != 1) return KeyEventResult.ignored;
+    if (c.findAncestorWidgetOfExactType<EditableText>() == null) return KeyEventResult.ignored;
     _directional.invoke(DirectionalFocusIntent(direction));
     return KeyEventResult.handled;
   }
