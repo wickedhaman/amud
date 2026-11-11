@@ -6,6 +6,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'l10n.dart';
 import 'providers.dart';
 import 'settings.dart';
 
@@ -245,7 +246,10 @@ class KeypadLayer extends ConsumerStatefulWidget {
   /// Back, as the phone's back key goes.
   final VoidCallback onBack;
   final Widget child;
-  const KeypadLayer({super.key, required this.onMenu, required this.onBack, required this.child});
+  /// Keep the physical soft-key legend in generic keypad shells; the app
+  /// replaces it with its compact Home/Siddur/Settings row.
+  final bool showSoftKeys;
+  const KeypadLayer({super.key, required this.onMenu, required this.onBack, required this.child, this.showSoftKeys = true});
 
   @override
   ConsumerState<KeypadLayer> createState() => _KeypadLayerState();
@@ -336,6 +340,43 @@ class _KeypadLayerState extends ConsumerState<KeypadLayer> {
             ),
           ),
         ]),
+      ),
+    );
+  }
+}
+
+/// Names the phone's physical soft keys along the bottom of the screen.
+class SoftKeyBar extends StatelessWidget {
+  const SoftKeyBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final style = theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700, color: theme.colorScheme.onSurface);
+    Widget label(String text, AlignmentGeometry at) => Expanded(
+          child: Align(
+            alignment: at,
+            child: FittedBox(fit: BoxFit.scaleDown, child: Text(context.tr(text), maxLines: 1, style: style)),
+          ),
+        );
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        color: theme.colorScheme.surfaceContainerHigh,
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 26,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(children: [
+                label('Menu', Alignment.centerLeft),
+                label('Select', Alignment.center),
+                label('Back', Alignment.centerRight),
+              ]),
+            ),
+          ),
+        ),
       ),
     );
   }
