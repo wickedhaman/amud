@@ -25,7 +25,7 @@ import 'shnayim_mikra_screen.dart';
 import 'torah_library.dart';
 import 'torah_settings.dart';
 import '../gemara/gemara_data.dart' show bookDownloadProvider, estimatedUnitBytes, savedUnitsProvider;
-import '../gemara/gemara_home_screen.dart' show DafVideoButton, studyPath;
+import '../gemara/gemara_home_screen.dart' show studyPath;
 import '../gemara/gemara_user.dart';
 import '../gemara/study_book.dart';
 
@@ -393,11 +393,7 @@ class KitzurYomiTile extends ConsumerWidget {
             style: TextStyle(color: theme.colorScheme.onPrimaryContainer)),
         trailing: ev == null
             ? null
-            : Row(mainAxisSize: MainAxisSize.min, children: [
-                // The day's video shiur, as beside Daf Yomi.
-                if (target != null) DafVideoButton.kitzur(siman: target.siman, seif: target.from),
-                Icon(inApp ? Icons.chevron_right : Icons.open_in_new, color: theme.colorScheme.onPrimaryContainer),
-              ]),
+            : Icon(inApp ? Icons.chevron_right : Icons.open_in_new, color: theme.colorScheme.onPrimaryContainer),
         onTap: ev == null
             ? null
             : inApp
