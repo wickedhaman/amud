@@ -1,0 +1,39 @@
+name: LG Exalt Android 6 build
+
+on:
+  push:
+    branches: [lg-exalt-android6-dpad]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android6-armv7:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.41.2
+          cache: true
+      - name: Resolve dependencies
+        run: flutter pub get
+      - name: Analyze Dart code
+        run: flutter analyze
+      - name: Run Flutter tests
+        run: flutter test
+      - name: Build compact Android 6 ARMv7 APK
+        run: flutter build apk --release --flavor github --target-platform android-arm --build-name=0.14.0 --build-number=${{ github.run_number }}
+      - name: Rename APK
+        run: cp build/app/outputs/flutter-apk/app-github-release.apk amud-lg-exalt-android6-armv7.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: amud-lg-exalt-android6-armv7
+          path: amud-lg-exalt-android6-armv7.apk
+          retention-days: 30
