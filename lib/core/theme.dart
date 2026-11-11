@@ -1,4 +1,3 @@
-import 'package:cupertino_native_better/cupertino_native_better.dart' show PlatformVersion;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -82,7 +81,7 @@ bool get isCupertinoPlatform =>
 
 /// iOS 26 and later, where the native controls (tab bar, alerts) are drawn
 /// by UIKit in Liquid Glass.
-bool get isLiquidGlass => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS && PlatformVersion.isIOS26OrLater;
+bool get isLiquidGlass => false;
 
 ThemeData buildTheme(AppSettings s, Brightness brightness) {
   final dark = brightness == Brightness.dark;

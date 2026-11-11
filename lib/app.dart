@@ -1,4 +1,3 @@
-import 'package:cupertino_native_better/cupertino_native_better.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,9 +61,6 @@ void openFromOutside(GoRouter router, String route) {
 
 final routerProvider = Provider<GoRouter>((ref) => GoRouter(
       navigatorKey: _rootKey,
-      // Tells the glass tab bar when a sheet or dialog covers it: UIKit
-      // draws it above Flutter, so it steps aside.
-      observers: [if (isLiquidGlass) CNTabBarRouteObserver(), ..._sheetObservers()],
       // The app opens on the first tab of the bar. A launch link opens over
       // it after the first frame (see openFromOutside), so back and the tab
       // bar lead somewhere.
@@ -519,15 +515,6 @@ class AdaptiveShell extends ConsumerWidget {
         ]),
       );
     }
-    if (isLiquidGlass) {
-      // Pages scroll under the floating bar, so its glass has something to
-      // refract. Their scroll views leave room at the end (pagePadding).
-      return Scaffold(
-        extendBody: true,
-        body: _swipeable(focus, items),
-        bottomNavigationBar: away(vertical: true, _GlassTabBar(items: items, selected: selected, labels: labels, onTap: onTap)),
-      );
-    }
     if (isCupertinoPlatform) {
       return Scaffold(
         body: _swipeable(focus, items),
@@ -559,75 +546,3 @@ class AdaptiveShell extends ConsumerWidget {
   }
 }
 
-/// One per navigator: counts the sheets and dialogs open over the glass tab
-/// bar (iOS 26), which UIKit would otherwise draw on top of them. Most
-/// sheets open on their tab's navigator, under the bar.
-List<NavigatorObserver> _sheetObservers() => [if (isLiquidGlass) _SheetObserver()];
-
-class _SheetObserver extends NavigatorObserver {
-  static final open = ValueNotifier(0);
-
-  static bool _covers(Route<dynamic> r) => r is ModalBottomSheetRoute || r is RawDialogRoute || r is CupertinoModalPopupRoute;
-
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (_covers(route)) open.value++;
-  }
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => _gone(route);
-
-  @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) => _gone(route);
-
-  void _gone(Route<dynamic> route) {
-    if (_covers(route) && open.value > 0) open.value--;
-  }
-}
-
-/// UIKit's own tab bar, in Liquid Glass (iOS 26).
-class _GlassTabBar extends StatefulWidget {
-  final List<NavItem> items;
-  final int selected;
-  final bool labels;
-  final ValueChanged<int> onTap;
-  const _GlassTabBar({required this.items, required this.selected, required this.labels, required this.onTap});
-
-  @override
-  State<_GlassTabBar> createState() => _GlassTabBarState();
-}
-
-class _GlassTabBarState extends State<_GlassTabBar> {
-  void _tap(int i) {
-    widget.onTap(i);
-    // UIKit has already marked the tapped item. A shortcut opens a page and
-    // leaves the tab where it was, so the bar is rebuilt to mark it again.
-    if (widget.items[i].branch == null) setState(() {});
-  }
-
-  // UIKit's own tab bar size; the package's default (24pt) is larger.
-  static const _iconSize = 18.0;
-
-  @override
-  Widget build(BuildContext context) => ValueListenableBuilder(
-        valueListenable: _SheetObserver.open,
-        // While a sheet or dialog is up the bar steps aside, as UIKit's does
-        // under a sheet.
-        builder: (context, sheets, bar) => sheets > 0 ? const SizedBox.shrink() : bar!,
-        // The bar reports its own height, home indicator included.
-        child: CNTabBar(
-          currentIndex: widget.selected,
-          onTap: _tap,
-          tint: Theme.of(context).colorScheme.primary,
-          iconSize: _iconSize,
-          items: [
-            for (final t in widget.items)
-              CNTabBarItem(
-                label: widget.labels ? context.tr(t.label) : null,
-                icon: CNSymbol(t.symbols.$1, size: _iconSize),
-                activeIcon: CNSymbol(t.symbols.$2, size: _iconSize),
-              ),
-          ],
-        ),
-      );
-}
