@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:amud/features/gemara/daf_layout.dart';
 import 'package:amud/features/gemara/daf_page.dart';
-import 'package:amud/features/gemara/daf_video.dart';
 import 'package:amud/features/gemara/gemara_data.dart';
 import 'package:amud/features/gemara/gemara_perakim.dart';
 import 'package:amud/features/gemara/gemara_text.dart';
@@ -274,23 +273,6 @@ void main() {
     expect({for (final x in w.inner) x.comment}, {0, 1, 2});
     expect(w.inner.where((x) => x.comment == 2).every((x) => x.segment == 1), isTrue);
     expect(commentaryInfo('rashbam').inner, isTrue);
-  });
-
-  test('daf videos: an HEVC and a 720p playlist per daf, from video.amud.page unless the base is empty', () {
-    expect(dafVideoUri('Bekhorot', 30).toString(), 'https://video.amud.page/daf/bekhorot/30/avc/index.m3u8');
-    expect(dafVideoUri('Berakhot', 2, DafStream.avc, ''), isNull);
-    const base = 'https://video.example.com/daf/';
-    expect(dafVideoUri('Bava Metzia', 59, DafStream.hevc, base).toString(), 'https://video.example.com/daf/bava-metzia/59/hevc/index.m3u8');
-    expect(dafVideoUri('Bava Metzia', 59, DafStream.avc, base).toString(), 'https://video.example.com/daf/bava-metzia/59/avc/index.m3u8');
-    expect(dafVideoPath('Bava Metzia', '59'), '/daf-video?t=Bava+Metzia&d=59');
-  });
-
-  test("Kitzur Yomi videos: one per day, by the siman and se'if its portion starts at", () {
-    expect(kitzurVideoUnit(2, 4), '2-4');
-    expect(studyVideoUri(kitzurId, kitzurVideoUnit(2, 4)).toString(), 'https://video.amud.page/daf/kitzur-shulchan-arukh/2-4/avc/index.m3u8');
-    expect(studyVideoUri(kitzurId, '2-4', DafStream.hevc, 'https://video.example.com/daf').toString(),
-        'https://video.example.com/daf/kitzur-shulchan-arukh/2-4/hevc/index.m3u8');
-    expect(dafVideoPath(kitzurId, '2-4'), '/daf-video?t=Kitzur+Shulchan+Arukh&d=2-4');
   });
 
   test('server address gets a scheme', () {
