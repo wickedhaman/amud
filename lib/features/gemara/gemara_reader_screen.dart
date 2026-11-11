@@ -22,9 +22,8 @@ import '../torah/torah_settings.dart';
 import 'daf_layout.dart';
 import 'daf_page.dart';
 import 'daf_print.dart';
-import 'daf_video.dart';
 import 'gemara_data.dart';
-import 'gemara_home_screen.dart' show DafVideoButton, dafOfAmud, studyPath;
+import 'gemara_home_screen.dart' show studyPath;
 import 'gemara_perakim.dart';
 import 'gemara_settings.dart';
 import 'gemara_settings_sheet.dart';
@@ -378,72 +377,50 @@ class _GemaraReaderScreenState extends ConsumerState<GemaraReaderScreen> with Fo
     _share = _portionShare();
     if (_share != null) _progress.value ??= _share!.start;
 
-    // The daf's video, or a Kitzur Yomi day's (or the first in the siman).
-    final video = switch (t.kind) {
-      StudyKind.bavli when dafOfAmud(widget.amud) != null => DafVideoButton(tractate: widget.tractate, daf: dafOfAmud(widget.amud)!),
-      StudyKind.kitzur => DafVideoButton.kitzur(siman: int.parse(widget.amud), seif: widget.from == null ? null : widget.from! + 1),
-      _ => null,
-    };
-    if (video != null) dafVideoIndex.load();
     final title = t.unitTitle(context, widget.amud);
-    final bar = ValueListenableBuilder(
-      valueListenable: dafVideoIndex,
-      builder: (context, _, _) {
-        final videoUnit = video?.readyUnit;
-        return AppBar(
-          title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title),
-            Text(views.firstWhere((v) => v.$1 == view).$3, style: theme.textTheme.bodySmall),
-          ]),
-          // On a narrow phone the link, then Reader mode, the bookmark, text
-          // settings and the video wait in a menu.
-          actions: fitBarActions(context, title, spare: [if (videoUnit != null) ...[5, 4, 2, 3, 1] else ...[4, 3, 1, 2]], [
-            BarTool.custom(PopupMenuButton<GemaraView>(
-              tooltip: context.tr('View'),
-              icon: Icon(views.firstWhere((v) => v.$1 == view).$2),
-              onSelected: (v) {
-                ref.read(gemaraSettingsProvider.notifier).update((x) => x.withView(_kind, v));
-                setState(() => _word = null);
-              },
-              itemBuilder: (context) => [
-                for (final (v, icon, label) in views)
-                  CheckedPopupMenuItem(value: v, checked: v == view, child: Row(children: [Icon(icon, size: 20), const SizedBox(width: 12), Text(label)])),
-              ],
-            )),
-            if (videoUnit != null)
-              BarTool(
-                tooltip: context.tr('Watch the shiur'),
-                icon: const Icon(Icons.movie_outlined),
-                onPressed: () => context.push(dafVideoPath(video!.tractate, videoUnit)),
-              ),
-            BarTool(
-              tooltip: bookmarked ? context.tr('Remove bookmark') : context.tr('Bookmark'),
-              isSelected: bookmarked,
-              icon: const Icon(Icons.bookmark_border),
-              selectedIcon: const Icon(Icons.bookmark),
-              onPressed: () => ref.read(gemaraMarksProvider.notifier).toggleBookmark(DafPlace(widget.tractate, widget.amud, _selected ?? _visible)),
-            ),
-            BarTool(tooltip: context.tr('Text settings'), icon: const Icon(Icons.text_fields), onPressed: () => showGemaraSettings(context, book: t)),
-            BarTool(
-              tooltip: context.tr('Reader mode'),
-              isSelected: _readerMode,
-              icon: const Icon(Icons.chrome_reader_mode_outlined),
-              selectedIcon: const Icon(Icons.chrome_reader_mode),
-              onPressed: () => _readerMode ? setState(() => _readerMode = false) : _startReader(_selected ?? _visible),
-            ),
-            BarTool(
-              tooltip: context.tr('Copy link'),
-              icon: const Icon(Icons.link),
-              onPressed: () async {
-                // This unit, at the marked passage if there is one.
-                final link = shareTorahLink(studyPath(widget.tractate, widget.amud, segment: _selected));
-                await Clipboard.setData(ClipboardData(text: link.toString()));
-                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('Link copied'))));
-              },
-            ),
-          ]),
-        );
-      },
+    final bar = AppBar(
+      title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(title),
+        Text(views.firstWhere((v) => v.$1 == view).$3, style: theme.textTheme.bodySmall),
+      ]),
+      actions: fitBarActions(context, title, spare: [4, 3, 1, 2], [
+        BarTool.custom(PopupMenuButton<GemaraView>(
+          tooltip: context.tr('View'),
+          icon: Icon(views.firstWhere((v) => v.$1 == view).$2),
+          onSelected: (v) {
+            ref.read(gemaraSettingsProvider.notifier).update((x) => x.withView(_kind, v));
+            setState(() => _word = null);
+          },
+          itemBuilder: (context) => [
+            for (final (v, icon, label) in views)
+              CheckedPopupMenuItem(value: v, checked: v == view, child: Row(children: [Icon(icon, size: 20), const SizedBox(width: 12), Text(label)])),
+          ],
+        )),
+        BarTool(
+          tooltip: bookmarked ? context.tr('Remove bookmark') : context.tr('Bookmark'),
+          isSelected: bookmarked,
+          icon: const Icon(Icons.bookmark_border),
+          selectedIcon: const Icon(Icons.bookmark),
+          onPressed: () => ref.read(gemaraMarksProvider.notifier).toggleBookmark(DafPlace(widget.tractate, widget.amud, _selected ?? _visible)),
+        ),
+        BarTool(tooltip: context.tr('Text settings'), icon: const Icon(Icons.text_fields), onPressed: () => showGemaraSettings(context, book: t)),
+        BarTool(
+          tooltip: context.tr('Reader mode'),
+          isSelected: _readerMode,
+          icon: const Icon(Icons.chrome_reader_mode_outlined),
+          selectedIcon: const Icon(Icons.chrome_reader_mode),
+          onPressed: () => _readerMode ? setState(() => _readerMode = false) : _startReader(_selected ?? _visible),
+        ),
+        BarTool(
+          tooltip: context.tr('Copy link'),
+          icon: const Icon(Icons.link),
+          onPressed: () async {
+            final link = shareTorahLink(studyPath(widget.tractate, widget.amud, segment: _selected));
+            await Clipboard.setData(ClipboardData(text: link.toString()));
+            if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('Link copied'))));
+          },
+        ),
+      ]),
     );
 
     final body = switch (daf) {
