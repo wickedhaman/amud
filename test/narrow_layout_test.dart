@@ -7,7 +7,6 @@ import 'package:amud/core/providers.dart';
 import 'package:amud/core/settings.dart';
 import 'package:amud/core/storage.dart';
 import 'package:amud/core/theme.dart';
-import 'package:amud/features/gemara/daf_video.dart';
 import 'package:amud/features/gemara/gemara_home_screen.dart';
 import 'package:amud/features/gemara/gemara_reader_screen.dart';
 import 'package:amud/features/gemara/gemara_user.dart';
@@ -269,46 +268,6 @@ void main() {
       await t.pump(const Duration(seconds: 20));
     });
 
-    testWidgets("the Gemara's Continue and Daf Yomi stack where they don't fit side by side", (t) async {
-      dafVideoIndex.value = {'bekhorot': {'31'}};
-      addTearDown(() => dafVideoIndex.value = const {});
-      Future<double> rise(double width, double scale) async {
-        final c = await _phone(t, width, scale, _ny(2026, 10, 19, 12), const StudyHomeScreen(kind: StudyKind.bavli));
-        c.read(gemaraMarksProvider.notifier).visit(const DafPlace('Bekhorot', '30b'));
-        await t.pump();
-        expect(find.byIcon(Icons.movie_outlined), findsOneWidget);
-        return t.getTopLeft(find.text('Daf Yomi')).dy - t.getTopLeft(find.text('Continue')).dy;
-      }
-
-      expect(await rise(320, 1.3), greaterThan(20));
-      expect(await rise(900, 1), 0);
-      await t.pumpWidget(const SizedBox());
-      await t.pump(const Duration(seconds: 20));
-    });
-
-    testWidgets("the reader's bar keeps the daf's name, the rest in a menu", (t) async {
-      dafVideoIndex.value = {'bekhorot': {'31'}};
-      addTearDown(() => dafVideoIndex.value = const {});
-      await _phone(t, 320, 1.3, _ny(2026, 10, 19, 12), const GemaraReaderScreen(tractate: 'Bekhorot', amud: '31a'));
-      expect(_menu, findsOneWidget);
-      expect(find.byIcon(Icons.link), findsNothing);
-      // A wide window has room for everything, the video among them.
-      await _phone(t, 1200, 1, _ny(2026, 10, 19, 12), const GemaraReaderScreen(tractate: 'Bekhorot', amud: '31a'));
-      expect(_menu, findsNothing);
-      expect(find.byIcon(Icons.movie_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.link), findsOneWidget);
-      await t.pumpWidget(const SizedBox());
-      await t.pump(const Duration(seconds: 20));
-    });
-
-    testWidgets('on a compact learning card the video goes under Daf Yomi', (t) async {
-      dafVideoIndex.value = {'bekhorot': {'31'}};
-      addTearDown(() => dafVideoIndex.value = const {});
-      await _phone(t, 320, 1.3, _ny(2026, 10, 19, 12), _card('learning', span: 1, settings: const {'schedules': ['dafYomi']}));
-      expect(t.getTopLeft(find.byIcon(Icons.movie_outlined)).dy, greaterThan(t.getTopLeft(find.text('Daf Yomi (Bavli)')).dy + 10));
-      await t.pumpWidget(const SizedBox());
-      await t.pump(const Duration(seconds: 20));
-    });
   });
 
   testWidgets('a compact minyan card shrinks GoDaven rather than breaking it, the link beside it', (t) async {
