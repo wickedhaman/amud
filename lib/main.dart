@@ -23,7 +23,7 @@ import 'features/update/update_service.dart';
 import 'features/home/cards/builtin_cards.dart';
 import 'features/integrations/seasonal_windows.dart';
 
-Future<void> main(List<String> args) async {
+void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(_Bootstrap(args: args));
 }
