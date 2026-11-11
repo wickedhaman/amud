@@ -40,7 +40,6 @@ import 'features/tehillim/tehillim_data.dart';
 import 'features/tehillim/tehillim_reader.dart';
 import 'features/tehillim/tehillim_screen.dart';
 import 'features/torah/shnayim_mikra_screen.dart';
-import 'features/gemara/daf_video.dart';
 import 'features/gemara/gemara_home_screen.dart';
 import 'features/gemara/study_book.dart';
 import 'features/gemara/gemara_reader_screen.dart';
@@ -298,13 +297,7 @@ final routerProvider = Provider<GoRouter>((ref) => GoRouter(
         GoRoute(path: '/calendar', parentNavigatorKey: _rootKey, builder: (c, s) => const CalendarScreen()),
         GoRoute(path: '/learning', parentNavigatorKey: _rootKey, builder: (c, s) => const LearningScreen()),
         GoRoute(path: '/meein-shalosh', parentNavigatorKey: _rootKey, builder: (c, s) => const MeeinShaloshScreen()),
-        GoRoute(
-            path: '/daf-video',
-            parentNavigatorKey: _rootKey,
-            builder: (c, s) => DafVideoScreen(
-                key: ValueKey(s.uri.toString()),
-                tractate: s.uri.queryParameters['t'] ?? 'Berakhot',
-                unit: s.uri.queryParameters['d'] ?? '2')),
+
       ],
     ));
 
