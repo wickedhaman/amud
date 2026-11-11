@@ -281,7 +281,9 @@ class _KeypadLayerState extends ConsumerState<KeypadLayer> {
     };
     final c = primaryFocus?.context;
     if (direction == null || c == null || !c.mounted) return KeyEventResult.ignored;
-    if (c.findAncestorWidgetOfExactType<EditableText>() == null) return KeyEventResult.ignored;
+    final editor = c.findAncestorWidgetOfExactType<EditableText>() != null;
+    final slider = c.findAncestorWidgetOfExactType<Slider>() != null || c.findAncestorWidgetOfExactType<RangeSlider>() != null;
+    if (!editor && !slider) return KeyEventResult.ignored;
     _directional.invoke(DirectionalFocusIntent(direction));
     return KeyEventResult.handled;
   }
