@@ -227,10 +227,12 @@ class ListFilter extends InheritedWidget {
 class PageSearchBar extends ConsumerStatefulWidget {
   final String page;
   final String hint;
-  const PageSearchBar({super.key, required this.page, required this.hint});
+  final bool compact;
+  const PageSearchBar({super.key, required this.page, required this.hint, this.compact = false});
 
-  /// Height to reserve under an app bar.
+  /// Heights to reserve under an app bar.
   static const height = 64.0;
+  static const compactHeight = 52.0;
 
   @override
   ConsumerState<PageSearchBar> createState() => _PageSearchBarState();
@@ -264,13 +266,13 @@ class _PageSearchBarState extends ConsumerState<PageSearchBar> {
     });
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+      padding: EdgeInsets.fromLTRB(12, widget.compact ? 4 : 4, 12, widget.compact ? 4 : 8),
       child: SearchBar(
         controller: _controller,
         hintText: widget.hint,
         elevation: const WidgetStatePropertyAll(0),
         backgroundColor: WidgetStatePropertyAll(theme.colorScheme.surfaceContainerHigh),
-        constraints: const BoxConstraints(minHeight: 48, maxHeight: 48),
+        constraints: BoxConstraints(minHeight: widget.compact ? 44 : 48, maxHeight: widget.compact ? 44 : 48),
         leading: const Icon(Icons.search),
         trailing: [
           if (_controller.text.isNotEmpty)
