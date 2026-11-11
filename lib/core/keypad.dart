@@ -328,47 +328,7 @@ class _KeypadLayerState extends ConsumerState<KeypadLayer> {
               child: _FocusRing(child: app),
             ),
           ),
-          if (!focusMode) const SoftKeyBar(),
         ]),
-      ),
-    );
-  }
-}
-
-/// Names the soft keys along the bottom of the screen: the menu at the left
-/// key, OK at the center, back at the right.
-class SoftKeyBar extends StatelessWidget {
-  const SoftKeyBar({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700, color: theme.colorScheme.onSurface);
-    Widget label(String text, AlignmentGeometry at) => Expanded(
-          child: Align(
-            alignment: at,
-            child: FittedBox(fit: BoxFit.scaleDown, child: Text(context.tr(text), maxLines: 1, style: style)),
-          ),
-        );
-    // The keys are where they are on the phone, whatever the language.
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Material(
-        color: theme.colorScheme.surfaceContainerHigh,
-        child: SafeArea(
-          top: false,
-          child: SizedBox(
-            height: 26,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Row(children: [
-                label('Menu', Alignment.centerLeft),
-                label('Select', Alignment.center),
-                label('Back', Alignment.centerRight),
-              ]),
-            ),
-          ),
-        ),
       ),
     );
   }
