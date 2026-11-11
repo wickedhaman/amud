@@ -3,7 +3,18 @@ name: LG Exalt Android 6 build
 on:
   push:
     branches: [lg-exalt-android6-dpad]
+    paths:
+      - 'lib/**'
+      - 'android/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'packages/**'
+      - '.github/workflows/lg-exalt-android6.yml'
   workflow_dispatch:
+
+concurrency:
+  group: lg-exalt-android6-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
