@@ -442,6 +442,40 @@ class AdaptiveShell extends ConsumerWidget {
           },
           child: shell,
         ),
+        // Three compact, real focus targets replace the oversized tab bar on
+        // non-touch phones. D-pad arrows move between them; Select opens one.
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Material(
+            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+            child: SizedBox(
+              height: 44,
+              child: Row(children: [
+                for (final item in [
+                  (0, 'Home', Icons.home_outlined),
+                  (1, 'Siddur', Icons.menu_book_outlined),
+                  (5, 'Settings', Icons.settings_outlined),
+                ])
+                  Expanded(
+                    child: InkWell(
+                      autofocus: shell.currentIndex == item.$1,
+                      onTap: () => _go(item.$1),
+                      child: SizedBox.expand(
+                        child: Center(
+                          child: Row(mainAxisSize: MainAxisSize.min, children: [
+                            Icon(item.$3, size: 18),
+                            const SizedBox(width: 4),
+                            Flexible(child: Text(context.tr(item.$2), maxLines: 1, overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: shell.currentIndex == item.$1 ? FontWeight.w700 : FontWeight.w500))),
+                          ]),
+                        ),
+                      ),
+                    ),
+                  ),
+              ]),
+            ),
+          ),
+        ),
       ),
     );
   }
