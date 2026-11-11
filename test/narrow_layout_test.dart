@@ -253,7 +253,7 @@ void main() {
     expect(keepTogether('ח׳ חשון תשפ״ז'), 'ח׳ חשון תשפ״ז');
   });
 
-  group('Kiddush Levana, Daf Yomi video', () {
+  group('Kiddush Levana', () {
     testWidgets('the card’s name is whole, with no status badge beside it', (t) async {
       // Thursday before Tammuz 5787's window, which opens Motzei Shabbos.
       // (The test font's letters are about twice as wide as Roboto's, so
