@@ -9,7 +9,6 @@ import 'package:hebcal/hebcal.dart';
 import '../../core/adaptive.dart';
 import '../../core/l10n.dart';
 import '../../core/providers.dart';
-import 'daf_video.dart';
 import '../../core/search.dart';
 import '../search/search_synonyms.dart';
 import 'gemara_data.dart';
@@ -178,7 +177,6 @@ class _StudyHomeScreenState extends ConsumerState<StudyHomeScreen> {
                 place: title(today.book, today.unit),
                 done: marks.isComplete(today.book, today.unit),
                 onTap: () => context.push(studyPath(today.book, today.unit, from: today.from, to: today.to)),
-                trailing: bavli && dafOfAmud(today.unit) != null ? DafVideoButton(tractate: today.book, daf: dafOfAmud(today.unit)!) : null,
               ),
           ];
           if (shortcuts.length == 2 && shortcuts.every((s) => s.width(context) <= (c.maxWidth - 8) / 2)) {
@@ -364,15 +362,13 @@ class _Shortcut extends StatelessWidget {
   final bool done;
   final VoidCallback onTap;
 
-  /// Beside the place, inside the card (Daf Yomi's video).
-  final Widget? trailing;
-  const _Shortcut({required this.icon, required this.label, required this.place, required this.onTap, this.done = false, this.trailing});
+  const _Shortcut({required this.icon, required this.label, required this.place, required this.onTap, this.done = false});
 
   /// How wide it is with the label and the place each on one line.
   double width(BuildContext context) {
     final theme = Theme.of(context);
     final text = math.max(textWidth(context, label, theme.textTheme.labelMedium), textWidth(context, place, theme.textTheme.titleMedium));
-    return 12 + 24 + 10 + text + (trailing == null ? 0 : 40) + 12 + 2;
+    return 12 + 24 + 10 + text + 12 + 2;
   }
 
   @override
@@ -394,7 +390,6 @@ class _Shortcut extends StatelessWidget {
                 Text(place, style: theme.textTheme.titleMedium),
               ]),
             ),
-            ?trailing,
           ]),
         ),
       ),
@@ -670,7 +665,6 @@ class _DafTile extends ConsumerWidget {
               style: (he ? const TextStyle(fontFamily: 'FrankRuehlCLM', fontSize: 16) : theme.textTheme.labelLarge)
                   ?.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(width: 3),
-          _VideoMark(tractate: t, daf: daf),
         ]),
         // Amud a on the right in a Hebrew interface, as in the book.
         Row(textDirection: he ? TextDirection.rtl : TextDirection.ltr, children: [side('a'), side('b')]),
@@ -679,98 +673,6 @@ class _DafTile extends ConsumerWidget {
   }
 }
 
-/// The video shiur for a daf (see [DafVideoScreen]). For a daf that has none
-/// yet (not in [dafVideoIndex]) it is dimmed and says so when tapped.
-class _VideoMark extends StatelessWidget {
-  final Tractate tractate;
-  final int daf;
-  const _VideoMark({required this.tractate, required this.daf});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    // Fetches the list the first time a tile shows (once a run).
-    dafVideoIndex.load();
-    return ValueListenableBuilder(
-      valueListenable: dafVideoIndex,
-      builder: (context, _, _) {
-        final ready = dafVideoUri(tractate.sefaria, daf) != null && dafVideoIndex.has(tractate.sefaria, daf);
-        return InkResponse(
-          radius: 14,
-          onTap: ready
-              ? () => context.push(dafVideoPath(tractate.sefaria, '$daf'))
-              : () => ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(SnackBar(content: Text(context.tr('Video shiurim are coming soon.')))),
-          child: Icon(Icons.movie_outlined,
-              size: 15, color: ready ? theme.colorScheme.primary : theme.colorScheme.outline.withValues(alpha: 0.7)),
-        );
-      },
-    );
-  }
-}
-
 /// The daf of a Bavli amud ("50b" → 50); null for a unit that isn't one.
 int? dafOfAmud(String amud) => int.tryParse(RegExp(r'^(\d+)[ab]$').firstMatch(amud)?[1] ?? '');
 
-/// A button beside a way into a daf or a Kitzur Yomi (on Home, in the
-/// Gemara and the Kitzur, the reader's bar) that plays its video shiur.
-/// Dimmed for one without a video yet, saying so when tapped, unless
-/// [onlyWhenReady]; absent where videos are off.
-class DafVideoButton extends StatelessWidget {
-  /// The tractate (or the Kitzur) as Sefaria names it.
-  final String tractate;
-  final int? daf;
-
-  /// For the Kitzur: the siman, and the se'if the day's portion starts at
-  /// (null for the first day with a video in the siman).
-  final int? siman;
-  final int? seif;
-
-  /// Hidden, rather than dimmed, until there's a video (on a crowded bar).
-  final bool onlyWhenReady;
-  const DafVideoButton({super.key, required this.tractate, required int this.daf, this.onlyWhenReady = false})
-      : siman = null,
-        seif = null;
-  const DafVideoButton.kitzur({super.key, required int this.siman, this.seif, this.onlyWhenReady = false})
-      : tractate = kitzurId,
-        daf = null;
-
-  /// The video's unit when it's published, else null.
-  String? get readyUnit => switch (_unit) {
-        final u? when dafVideoIndex.hasUnit(tractate, u) => u,
-        _ => null,
-      };
-
-  String? get _unit => switch ((daf, siman, seif)) {
-        (final d?, _, _) => '$d',
-        (_, final s?, final e?) => kitzurVideoUnit(s, e),
-        (_, final s?, null) => dafVideoIndex.kitzurIn(s),
-        _ => null,
-      };
-
-  @override
-  Widget build(BuildContext context) {
-    if (dafVideoBase.isEmpty) return const SizedBox.shrink();
-    final theme = Theme.of(context);
-    dafVideoIndex.load();
-    return ValueListenableBuilder(
-      valueListenable: dafVideoIndex,
-      builder: (context, _, _) {
-        final unit = _unit;
-        final ready = unit != null && dafVideoIndex.hasUnit(tractate, unit);
-        if (!ready && onlyWhenReady) return const SizedBox.shrink();
-        return IconButton(
-          visualDensity: VisualDensity.compact,
-          tooltip: context.tr(ready ? 'Watch the shiur' : 'Video shiurim are coming soon.'),
-          icon: Icon(Icons.movie_outlined, color: ready ? theme.colorScheme.primary : theme.colorScheme.outline.withValues(alpha: 0.7)),
-          onPressed: ready
-              ? () => context.push(dafVideoPath(tractate, unit))
-              : () => ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(SnackBar(content: Text(context.tr('Video shiurim are coming soon.')))),
-        );
-      },
-    );
-  }
-}
