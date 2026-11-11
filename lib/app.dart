@@ -325,6 +325,7 @@ class SiddurApp extends ConsumerWidget {
         child: ReaderDevice(child: LaunchAnimation(child: KeypadLayer(
           onMenu: () => _appMenu(ref),
           onBack: () => ref.read(routerProvider).routerDelegate.popRoute(),
+          showSoftKeys: false,
           child: child!,
         ))),
       ),
