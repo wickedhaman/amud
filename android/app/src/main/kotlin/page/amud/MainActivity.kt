@@ -3,6 +3,7 @@ package page.amud
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.view.KeyEvent
 import android.provider.Settings
 import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
@@ -40,6 +41,17 @@ class MainActivity : FlutterActivity() {
         if (readerFullscreen) controller.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
         else controller.show(androidx.core.view.WindowInsetsCompat.Type.systemBars())
     }
+    // LG feature phones report their right soft key and End key using legacy
+    // Android key codes. Route both through Flutter's normal Back dispatcher.
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0 &&
+            (event.keyCode == KeyEvent.KEYCODE_SOFT_RIGHT || event.keyCode == KeyEvent.KEYCODE_ENDCALL)) {
+            onBackPressedDispatcher.onBackPressed()
+            return true
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         // Android 15 draws every app edge to edge; do the same on older versions
         // so the layout is one thing everywhere. Flutter pads for the system bars
