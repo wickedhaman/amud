@@ -24,6 +24,12 @@ jobs:
           cache: true
       - name: Resolve dependencies
         run: flutter pub get
+      # The app's path packages have their own test dependencies; resolve
+      # them so flutter analyze can inspect those packages without false errors.
+      - name: Resolve local package test dependencies
+        run: |
+          (cd packages/hebcal && dart pub get)
+          (cd packages/siddur_engine && dart pub get)
       - name: Analyze Dart code
         run: flutter analyze
       - name: Run Flutter tests
