@@ -51,16 +51,11 @@ dependencies:
   printing: ^5.14.0
   in_app_update: ^4.2.5
   cryptography: ^2.9.0
-  video_player: ^2.11.1
-  # video_player's player on Linux and Windows (packages/fvp/VENDORED.md).
-  fvp:
-    path: packages/fvp
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  video_player_platform_interface: ^6.9.0
 
 flutter:
   uses-material-design: true
