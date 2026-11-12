@@ -75,7 +75,7 @@ class _CustomZmanEditorState extends ConsumerState<_CustomZmanEditor> {
             ...switch (kind) {
               CustomZmanKind.offset => [
                   DropdownButtonFormField<String>(
-                    initialValue: baseKey,
+                    value: baseKey,
                     decoration: InputDecoration(labelText: context.tr('Relative to')),
                     items: [for (final d in builtInZmanim) DropdownMenuItem(value: d.key, child: Text(names.label(d.key)))],
                     onChanged: (v) => setState(() => baseKey = v!),
@@ -97,7 +97,7 @@ class _CustomZmanEditorState extends ConsumerState<_CustomZmanEditor> {
                   Text(context.tr('{n} shaot zmaniyot into the day', {'n': value.toStringAsFixed(2)})),
                   Slider.adaptive(value: value.clamp(0, 12), min: 0, max: 12, divisions: 48, onChanged: (v) => setState(() => value = v)),
                   DropdownButtonFormField<String>(
-                    initialValue: system,
+                    value: system,
                     decoration: InputDecoration(labelText: context.tr('Day defined by')),
                     items: [
                       DropdownMenuItem(value: 'gra', child: Text(context.tr('GRA (sunrise–sunset)'))),
