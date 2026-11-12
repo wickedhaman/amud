@@ -48,6 +48,9 @@ import 'features/integrations/ask_screen.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
 
+// No native glass tab bar is used on the Android 6 keypad build.
+List<NavigatorObserver> _sheetObservers() => [];
+
 /// Opens [route] from outside the app: a link, a launcher shortcut, the
 /// tray, a launch argument. A page above the tabs (a prayer opened on its
 /// own) is pushed over whatever is open, Home on a cold start, so back and
