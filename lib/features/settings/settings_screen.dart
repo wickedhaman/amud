@@ -529,7 +529,7 @@ class _CustomRulesScreenState extends ConsumerState<CustomRulesScreen> {
       content: SizedBox(width: 400, child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
         TextField(controller: title, decoration: InputDecoration(labelText: context.tr('Section title'))),
         SwitchListTile.adaptive(title: Text(context.tr('Match with a regular expression')), value: regex, onChanged: (v) => update(() => regex = v)),
-        DropdownButtonFormField<String>(initialValue: condition, items: [
+        DropdownButtonFormField<String>(value: condition, items: [
           const DropdownMenuItem(value: 'true', child: Text('Every day')),
           for (final variable in ['weekday', 'shabbat', 'yomTov', 'roshChodesh', 'chanukah', 'omer', 'minyan', 'mourner', 'tachanun'])
             DropdownMenuItem(value: variable, child: Text(DayContext.variableDocs[variable]!)),
