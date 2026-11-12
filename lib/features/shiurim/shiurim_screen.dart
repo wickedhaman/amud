@@ -232,7 +232,7 @@ class _ConverterState extends ConsumerState<ShiurimConverter> {
         Expanded(
           child: DropdownButtonFormField<String>(
             key: ValueKey('from-${m.id}-$_from'),
-            initialValue: _from,
+            value: _from,
             isExpanded: true,
             decoration: InputDecoration(labelText: context.tr('From'), border: const OutlineInputBorder()),
             items: [for (final u in m.units) item(u)],
@@ -251,7 +251,7 @@ class _ConverterState extends ConsumerState<ShiurimConverter> {
         Expanded(
           child: DropdownButtonFormField<String>(
             key: ValueKey('to-${m.id}-$_to'),
-            initialValue: _to,
+            value: _to,
             isExpanded: true,
             decoration: InputDecoration(labelText: context.tr('To'), border: const OutlineInputBorder()),
             items: [for (final u in m.units) item(u)],
@@ -363,7 +363,7 @@ class _ShiurimSettingsSheet extends ConsumerWidget {
             SizedBox(
               width: 72,
               child: TextFormField(
-                initialValue: s.currency,
+                value: s.currency,
                 decoration: InputDecoration(labelText: context.tr('Currency'), border: const OutlineInputBorder()),
                 onChanged: (v) => n.update((x) => x.copyWith(currency: v.trim())),
               ),
@@ -371,7 +371,7 @@ class _ShiurimSettingsSheet extends ConsumerWidget {
             const SizedBox(width: 8),
             Expanded(
               child: TextFormField(
-                initialValue: s.silverPerGram == null ? '' : formatAmount(s.silverPerGram!),
+                value: s.silverPerGram == null ? '' : formatAmount(s.silverPerGram!),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(labelText: context.tr('Per gram'), border: const OutlineInputBorder()),
                 onChanged: (v) => n.update((x) => x.copyWith(silverPerGram: () => double.tryParse(v.replaceAll(',', '')))),
