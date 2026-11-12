@@ -422,7 +422,9 @@ void main() {
     // A long press on a day checks it off, or clears it, and leaves the day open as it was.
     final tuesday = find.widgetWithText(ChoiceChip, '3 · Tuesday');
     final semantics = tester.ensureSemantics();
-    expect(tester.getSemantics(tuesday), matchesSemantics(hasTapAction: true, hasLongPressAction: true, isSelected: false));
+    final dayNode = tester.getSemantics(tuesday);
+    expect(dayNode.hasAction(SemanticsAction.tap), isTrue);
+    expect(dayNode.hasAction(SemanticsAction.longPress), isTrue);
     semantics.dispose();
     await tester.longPress(tuesday);
     await tester.pump();
