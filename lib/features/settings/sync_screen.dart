@@ -102,7 +102,6 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
       final saved = await FilePicker.saveFile(
         fileName: 'amud-settings-${d.year}-${two(d.month)}-${two(d.day)}.json',
         bytes: bytes,
-        mimeType: 'application/json',
         type: FileType.custom,
         allowedExtensions: const ['json'],
       );
@@ -115,8 +114,8 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
   Future<void> _import() async {
     try {
       final files = await FilePicker.pickFiles(type: FileType.any);
-      if (files.isEmpty) return;
-      final bytes = await files.first.xFile.readAsBytes();
+      if (files == null || files.files.isEmpty) return;
+      final bytes = await files.files.first.xFile.readAsBytes();
       final keys = await importSettings(ref.read(storageProvider), bytes, groups: ref.read(syncIncludeProvider));
       ref.read(syncProvider.notifier).reload(keys);
       _toast('Settings imported');
