@@ -224,6 +224,7 @@ class _ShnayimMikraScreenState extends ConsumerState<ShnayimMikraScreen> with Fo
                 Padding(
                   padding: const EdgeInsetsDirectional.only(end: 6),
                   child: Semantics(
+                    container: true,
                     onLongPressHint: done(n)
                         ? context.tr('Mark aliyah {n} not done', {'n': n})
                         : context.tr('Mark aliyah {n} done', {'n': n}),
