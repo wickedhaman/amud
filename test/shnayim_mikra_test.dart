@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' show SemanticsAction;
 
 import 'package:amud/core/providers.dart';
 import 'package:amud/core/settings.dart';
@@ -423,8 +424,8 @@ void main() {
     final tuesday = find.widgetWithText(ChoiceChip, '3 · Tuesday');
     final semantics = tester.ensureSemantics();
     final dayNode = tester.getSemantics(tuesday);
-    expect(dayNode.hasAction(SemanticsAction.tap), isTrue);
-    expect(dayNode.hasAction(SemanticsAction.longPress), isTrue);
+    expect(dayNode.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    expect(dayNode.getSemanticsData().hasAction(SemanticsAction.longPress), isTrue);
     semantics.dispose();
     await tester.longPress(tuesday);
     await tester.pump();
