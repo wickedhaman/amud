@@ -56,7 +56,7 @@ class _AlertEditorState extends ConsumerState<_AlertEditor> {
             Text(widget.existing == null ? 'New zman alert' : 'Edit alert', style: theme.textTheme.titleLarge),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              initialValue: zmanKey,
+              value: zmanKey,
               isExpanded: true,
               decoration: InputDecoration(labelText: context.tr('Zman')),
               items: [for (final (k, n) in names.allKeys) DropdownMenuItem(value: k, child: Text(n, overflow: TextOverflow.ellipsis))],
