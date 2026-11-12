@@ -170,8 +170,11 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
     FocusScopeNode? current = scope;
     while (current != null) {
       candidates.addAll(current.traversalDescendants);
-      final parent = current.parent;
-      current = parent is FocusScopeNode ? parent : null;
+      FocusNode? parent = current.parent;
+      while (parent != null && parent is! FocusScopeNode) {
+        parent = parent.parent;
+      }
+      current = parent as FocusScopeNode?;
     }
     final from = focus.rect;
     return [
