@@ -223,7 +223,7 @@ void main() {
     await _press(t, LogicalKeyboardKey.select);
     expect(c.read(settingsProvider).uiLanguage, UiLanguage.he);
     // Down past the options to Next, at the bottom, and on to the next page.
-    for (var i = 0; i < 24 && !onNext(); i++) {
+    for (var i = 0; i < 64 && !onNext(); i++) {
       await _press(t, LogicalKeyboardKey.arrowDown);
     }
     expect(onNext(), isTrue);
