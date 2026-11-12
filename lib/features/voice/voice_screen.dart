@@ -389,7 +389,7 @@ class _VoiceScreenState extends ConsumerState<VoiceScreen>
           ],
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            initialValue: _language,
+            value: _language,
             decoration: InputDecoration(
               labelText: context.tr('Recognition language'),
             ),
