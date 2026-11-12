@@ -148,15 +148,17 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
       // focusInDirection can report success while wrapping within a nested
       // PageView scope, leaving the user trapped away from sibling controls.
       stops.sort((a, b) {
+        final origin = vertical ? focus.rect.center.dy : focus.rect.center.dx;
         final primaryA = vertical ? a.rect.center.dy : a.rect.center.dx;
         final primaryB = vertical ? b.rect.center.dy : b.rect.center.dx;
-        final primary = (primaryA - (vertical ? focus.rect.center.dy : focus.rect.center.dx))
-            .compareTo(primaryB - (vertical ? focus.rect.center.dy : focus.rect.center.dx));
+        // All candidates are already in the requested direction; compare
+        // distance, not signed coordinates (which reverses UP and LEFT).
+        final primary = (primaryA - origin).abs().compareTo((primaryB - origin).abs());
         if (primary != 0) return primary;
+        final crossOrigin = vertical ? focus.rect.center.dx : focus.rect.center.dy;
         final crossA = vertical ? a.rect.center.dx : a.rect.center.dy;
         final crossB = vertical ? b.rect.center.dx : b.rect.center.dy;
-        return (crossA - (vertical ? focus.rect.center.dx : focus.rect.center.dy))
-            .abs().compareTo((crossB - (vertical ? focus.rect.center.dx : focus.rect.center.dy)).abs());
+        return (crossA - crossOrigin).abs().compareTo((crossB - crossOrigin).abs());
       });
       stops.first.requestFocus();
       if (vertical) scheduleMicrotask(() => _fromItsStart(way));
@@ -174,20 +176,23 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
     bool focusable(FocusNode n) => n.canRequestFocus && !n.skipTraversal && n.context != null && n.context!.mounted;
     // A page with nothing focused yet: anything on it.
     if (focus is FocusScopeNode) return focus.traversalDescendants.where(focusable).toList();
-    final scope = focus.nearestScope;
-    if (scope == null) return const [];
-    // A page may put its scrolling choices in a nested FocusScope while
-    // keeping its Back/Next controls in the parent scope. Search outward
-    // through the containing scopes so the d-pad can leave the list and
-    // reach those controls at the visual edge.
-    final candidates = <FocusNode>{...FocusManager.instance.rootScope.descendants};
-    candidates.addAll(scope.traversalDescendants);
+    // Search the current scope first, then its containing scopes. This
+    // lets focus leave a nested scrolling list for its page's Back/Next
+    // controls without jumping to controls on an offstage PageView page.
     final from = focus.rect;
-    return [
-      for (final n in candidates)
-        if (n != focus && focusable(n) && !n.ancestors.contains(focus) && !focus.ancestors.contains(n))
-          if (_toward(n.rect, from, direction)) n,
-    ];
+    FocusNode? ancestor = focus.nearestScope;
+    while (ancestor != null) {
+      if (ancestor is FocusScopeNode) {
+        final stops = [
+          for (final n in ancestor.traversalDescendants)
+            if (n != focus && focusable(n) && !n.ancestors.contains(focus) && !focus.ancestors.contains(n))
+              if (_toward(n.rect, from, direction)) n,
+        ];
+        if (stops.isNotEmpty) return stops;
+      }
+      ancestor = ancestor.parent;
+    }
+    return const [];
   }
 
   static bool _toward(Rect r, Rect from, TraversalDirection direction) {
