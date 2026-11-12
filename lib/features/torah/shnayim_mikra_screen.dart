@@ -239,6 +239,7 @@ class _ShnayimMikraScreenState extends ConsumerState<ShnayimMikraScreen> with Fo
                       label: Text('$n · ${_day(context, n)}'),
                       selected: n == aliyah,
                       onSelected: (_) => setState(() => _aliyah = n),
+                      ),
                     ),
                   ),
                 ),
