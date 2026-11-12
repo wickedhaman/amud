@@ -162,9 +162,20 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
     if (focus is FocusScopeNode) return focus.traversalDescendants.where(focusable).toList();
     final scope = focus.nearestScope;
     if (scope == null) return const [];
+    // A page may put its scrolling choices in a nested FocusScope while
+    // keeping its Back/Next controls in the parent scope. Search outward
+    // through the containing scopes so the d-pad can leave the list and
+    // reach those controls at the visual edge.
+    final candidates = <FocusNode>{};
+    FocusScopeNode? current = scope;
+    while (current != null) {
+      candidates.addAll(current.traversalDescendants);
+      final parent = current.parent;
+      current = parent is FocusScopeNode ? parent : null;
+    }
     final from = focus.rect;
     return [
-      for (final n in scope.traversalDescendants)
+      for (final n in candidates)
         if (n != focus && focusable(n) && !n.ancestors.contains(focus) && !focus.ancestors.contains(n))
           if (_toward(n.rect, from, direction)) n,
     ];
