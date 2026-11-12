@@ -68,7 +68,7 @@ int maxNavItems(BuildContext context, {required bool labels, required Iterable<S
     final widest = !labels
         ? 0.0
         : ids.fold(0.0, (w, id) => math.max(w, textWidth(context, context.tr(NavItem.of(id)?.label ?? ''), style)));
-    fit = (size.width / math.max(72, widest + 4)).floor();
+    fit = (size.width / math.max(64, widest + 4)).floor();
   }
   return fit.clamp(2, navTabs.length + navShortcuts.length);
 }
