@@ -17,9 +17,16 @@ on:
 permissions:
   contents: read
 
+# Keep only the newest build for this branch; superseded builds should not
+# accumulate in the hosted-runner queue.
+concurrency:
+  group: lg-exalt-android6-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   android6-armv7:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
