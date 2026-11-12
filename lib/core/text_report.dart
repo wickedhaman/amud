@@ -209,7 +209,7 @@ class _TextReportDialogState extends State<TextReportDialog> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                initialValue: _type,
+                value: _type,
                 decoration: InputDecoration(
                   labelText: context.tr('Issue type'),
                 ),
