@@ -266,6 +266,8 @@ final Map<String, String> _english = {
 
 /// English → (Hebrew, Yiddish). Missing entries fall back to English.
 const Map<String, (String, String)> _strings = {
+  'Long press to mark aliyah {n} not done': ('לחיצה ממושכת לסימון עלייה {n} כלא הושלמה', 'לאנג דריקן צו באצייכענען עלייה {n} ווי נישט פארטיג'),
+  'Long press to mark aliyah {n} done': ('לחיצה ממושכת לסימון עלייה {n} כהושלמה', 'לאנג דריקן צו באצייכענען עלייה {n} ווי פארטיג'),
   'This section has no date condition. Individual lines may have their own instructions.': ('לקטע זה אין תנאי תאריך. לשורות בודדות עשויות להיות הוראות משלהן.', 'דער שטיקל האָט נישט קיין דאַטע־תּנאי. באַזונדערע שורות קענען האָבן אייגענע הוראות.'),
   'Uses the rules for this siddur, including your custom rules.': ('לפי כללי סידור זה, כולל הכללים האישיים שלכם.', 'לויט די כּללים פֿונעם סידור, אַרײַנגערעכנט אײַערע אייגענע כּללים.'),
   'Text sources': ('מקורות הטקסט', 'טעקסט־מקורות'),
