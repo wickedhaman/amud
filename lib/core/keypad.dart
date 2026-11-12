@@ -339,6 +339,7 @@ class _KeypadLayerState extends ConsumerState<KeypadLayer> {
               child: _FocusRing(child: directionalApp),
             ),
           ),
+          if (widget.showSoftKeys) const SoftKeyBar(),
         ]),
       ),
     );
