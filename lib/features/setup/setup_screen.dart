@@ -301,12 +301,11 @@ class _SiddurPage extends ConsumerWidget {
         else
           Card(
             clipBehavior: Clip.antiAlias,
-            child: RadioGroup<String>(
-              groupValue: current,
-              onChanged: (v) => set((x) => x.copyWith(defaultBook: () => v)),
-              child: Column(children: [
+            child: Column(children: [
                 for (final b in manifest.books)
                   RadioListTile<String>.adaptive(
+                    groupValue: current,
+                    onChanged: (v) => set((x) => x.copyWith(defaultBook: () => v)),
                     value: b.title,
                     title: SplitRow(crossAxisAlignment: CrossAxisAlignment.center, children: [
                       Text(context.term(b.title)),
@@ -314,7 +313,6 @@ class _SiddurPage extends ConsumerWidget {
                     ]),
                   ),
               ]),
-            ),
           ),
         const _Label('Prayer text'),
         _Choice<TextLayout>(
