@@ -259,7 +259,7 @@ class FontRepository extends Notifier<List<FontEntry>> {
         ? await FilePicker.pickFiles(type: FileType.any)
         : await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: importableFontExtensions);
     final added = <FontEntry>[];
-    for (final f in files) {
+    for (final f in files?.files ?? <PlatformFile>[]) {
       final bytes = await f.xFile.readAsBytes();
       added.add(await importBytes(fontNameFromFile(f.name), bytes));
     }
