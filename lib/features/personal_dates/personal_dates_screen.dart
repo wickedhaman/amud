@@ -124,7 +124,7 @@ class PersonalDatesScreen extends ConsumerWidget {
                     decoration: InputDecoration(labelText: context.tr('Name')),
                   ),
                   DropdownButtonFormField<PersonalDateKind>(
-                    initialValue: kind,
+                    value: kind,
                     items: [
                       for (final k in PersonalDateKind.values)
                         DropdownMenuItem(
@@ -166,7 +166,7 @@ class PersonalDatesScreen extends ConsumerWidget {
                   ),
                   DropdownButtonFormField<int>(
                     key: ValueKey(month),
-                    initialValue: month,
+                    value: month,
                     items: [
                       for (var m = 1; m <= 13; m++)
                         DropdownMenuItem(
