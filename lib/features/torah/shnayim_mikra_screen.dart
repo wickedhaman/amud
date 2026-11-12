@@ -242,7 +242,6 @@ class _ShnayimMikraScreenState extends ConsumerState<ShnayimMikraScreen> with Fo
                       ),
                     ),
                   ),
-                  ),
                 ),
             ]),
           ),
