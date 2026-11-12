@@ -497,41 +497,49 @@ class KeypadMenuItem {
 /// A menu for the left soft key: a list the d-pad moves through, the first
 /// item focused. Labels are already translated.
 Future<void> showKeypadMenu(BuildContext context, String title, List<KeypadMenuItem> items) async {
-  final picked = await showDialog<KeypadMenuItem>(
-    context: context,
-    useRootNavigator: true,
-    builder: (ctx) {
-      final theme = Theme.of(ctx);
-      return Dialog(
-        insetPadding: const EdgeInsets.all(8),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 360),
-          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-            ),
-            const Divider(height: 1),
-            Flexible(
-              child: ListView(shrinkWrap: true, padding: const EdgeInsets.symmetric(vertical: 4), children: [
-                for (final (i, item) in items.indexed)
-                  ListTile(
-                    autofocus: i == 0,
-                    dense: true,
-                    leading: item.icon == null ? null : Icon(item.icon, size: 20),
-                    minLeadingWidth: 20,
-                    title: Text(item.label),
-                    trailing: item.key == null
-                        ? null
-                        : Text(item.key!, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                    onTap: () => Navigator.pop(ctx, item),
-                  ),
-              ]),
-            ),
-          ]),
-        ),
-      );
-    },
-  );
-  picked?.onSelected();
+  final firstItemFocus = FocusNode(debugLabel: 'Keypad menu first item');
+  try {
+    final picked = await showDialog<KeypadMenuItem>(
+      context: context,
+      useRootNavigator: true,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (firstItemFocus.context?.mounted ?? false) firstItemFocus.requestFocus();
+        });
+        return Dialog(
+          insetPadding: const EdgeInsets.all(8),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 360),
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+              ),
+              const Divider(height: 1),
+              Flexible(
+                child: ListView(shrinkWrap: true, padding: const EdgeInsets.symmetric(vertical: 4), children: [
+                  for (final (i, item) in items.indexed)
+                    ListTile(
+                      focusNode: i == 0 ? firstItemFocus : null,
+                      dense: true,
+                      leading: item.icon == null ? null : Icon(item.icon, size: 20),
+                      minLeadingWidth: 20,
+                      title: Text(item.label),
+                      trailing: item.key == null
+                          ? null
+                          : Text(item.key!, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                      onTap: () => Navigator.pop(ctx, item),
+                    ),
+                ]),
+              ),
+            ]),
+          ),
+        );
+      },
+    );
+    picked?.onSelected();
+  } finally {
+    firstItemFocus.dispose();
+  }
 }
