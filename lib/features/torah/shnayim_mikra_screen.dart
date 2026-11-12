@@ -223,25 +223,21 @@ class _ShnayimMikraScreenState extends ConsumerState<ShnayimMikraScreen> with Fo
               for (var n = 1; n <= 7; n++)
                 Padding(
                   padding: const EdgeInsetsDirectional.only(end: 6),
-                  child: MergeSemantics(
-                    child: Semantics(
-                      onLongPressHint: done(n)
-                          ? context.tr('Mark aliyah {n} not done', {'n': n})
-                          : context.tr('Mark aliyah {n} done', {'n': n}),
-                      child: GestureDetector(
-                        onLongPress: () {
-                          if (!check(n)) Feedback.forLongPress(context);
-                        },
-                        child: ChoiceChip(
-                          showCheckmark: false,
-                          avatar: done(n)
-                              ? Icon(Icons.check_circle, size: 16, color: theme.colorScheme.primary)
-                              : (n == today ? const Icon(Icons.today, size: 16) : null),
-                          label: Text('$n · ${_day(context, n)}'),
-                          selected: n == aliyah,
-                          onSelected: (_) => setState(() => _aliyah = n),
-                        ),
-                      ),
+                  child: Semantics(
+                    onLongPressHint: done(n)
+                        ? context.tr('Mark aliyah {n} not done', {'n': n})
+                        : context.tr('Mark aliyah {n} done', {'n': n}),
+                    onLongPress: () {
+                      if (!check(n)) Feedback.forLongPress(context);
+                    },
+                    child: ChoiceChip(
+                      showCheckmark: false,
+                      avatar: done(n)
+                          ? Icon(Icons.check_circle, size: 16, color: theme.colorScheme.primary)
+                          : (n == today ? const Icon(Icons.today, size: 16) : null),
+                      label: Text('$n · ${_day(context, n)}'),
+                      selected: n == aliyah,
+                      onSelected: (_) => setState(() => _aliyah = n),
                     ),
                   ),
                 ),
