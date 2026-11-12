@@ -225,6 +225,7 @@ class _ShnayimMikraScreenState extends ConsumerState<ShnayimMikraScreen> with Fo
                   padding: const EdgeInsetsDirectional.only(end: 6),
                   child: Semantics(
                     container: true,
+                    explicitChildNodes: true,
                     button: true,
                     selected: n == aliyah,
                     label: '$n · ${_day(context, n)}',
