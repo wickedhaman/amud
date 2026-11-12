@@ -144,21 +144,21 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
       }
     }
     if (stops.isNotEmpty) {
-      // Flutter's directional traversal is confined to the current focus
-      // scope. When the nearest eligible control belongs to an enclosing
-      // scope (for example Setup's Next button below a PageView), request it
-      // directly rather than letting traversal wrap inside the page.
-      final crossScope = stops.where((n) => n.nearestScope != focus.nearestScope).toList();
-      if (crossScope.isNotEmpty) {
-        crossScope.sort((a, b) {
-          final da = (a.rect.center - focus.rect.center).distanceSquared;
-          final db = (b.rect.center - focus.rect.center).distanceSquared;
-          return da.compareTo(db);
-        });
-        crossScope.first.requestFocus();
-      } else if (!focus.focusInDirection(intent.direction)) {
-        stops.first.requestFocus();
-      }
+      // Pick the geometrically nearest stop in the requested direction.
+      // focusInDirection can report success while wrapping within a nested
+      // PageView scope, leaving the user trapped away from sibling controls.
+      stops.sort((a, b) {
+        final primaryA = vertical ? a.rect.center.dy : a.rect.center.dx;
+        final primaryB = vertical ? b.rect.center.dy : b.rect.center.dx;
+        final primary = (primaryA - (vertical ? focus.rect.center.dy : focus.rect.center.dx))
+            .compareTo(primaryB - (vertical ? focus.rect.center.dy : focus.rect.center.dx));
+        if (primary != 0) return primary;
+        final crossA = vertical ? a.rect.center.dx : a.rect.center.dy;
+        final crossB = vertical ? b.rect.center.dx : b.rect.center.dy;
+        return (crossA - (vertical ? focus.rect.center.dx : focus.rect.center.dy))
+            .abs().compareTo((crossB - (vertical ? focus.rect.center.dx : focus.rect.center.dy)).abs());
+      });
+      stops.first.requestFocus();
       if (vertical) scheduleMicrotask(() => _fromItsStart(way));
       return;
     }
