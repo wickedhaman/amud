@@ -363,7 +363,7 @@ class _ShiurimSettingsSheet extends ConsumerWidget {
             SizedBox(
               width: 72,
               child: TextFormField(
-                value: s.currency,
+                initialValue: s.currency,
                 decoration: InputDecoration(labelText: context.tr('Currency'), border: const OutlineInputBorder()),
                 onChanged: (v) => n.update((x) => x.copyWith(currency: v.trim())),
               ),
@@ -371,7 +371,7 @@ class _ShiurimSettingsSheet extends ConsumerWidget {
             const SizedBox(width: 8),
             Expanded(
               child: TextFormField(
-                value: s.silverPerGram == null ? '' : formatAmount(s.silverPerGram!),
+                initialValue: s.silverPerGram == null ? '' : formatAmount(s.silverPerGram!),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(labelText: context.tr('Per gram'), border: const OutlineInputBorder()),
                 onChanged: (v) => n.update((x) => x.copyWith(silverPerGram: () => double.tryParse(v.replaceAll(',', '')))),
