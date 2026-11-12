@@ -143,8 +143,22 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
         return;
       }
     }
-    if (stops.isNotEmpty && focus.focusInDirection(intent.direction)) {
-      // Once focus has moved (a microtask), before the frame is drawn.
+    if (stops.isNotEmpty) {
+      // Flutter's directional traversal is confined to the current focus
+      // scope. When the nearest eligible control belongs to an enclosing
+      // scope (for example Setup's Next button below a PageView), request it
+      // directly rather than letting traversal wrap inside the page.
+      final crossScope = stops.where((n) => n.nearestScope != focus.nearestScope).toList();
+      if (crossScope.isNotEmpty) {
+        crossScope.sort((a, b) {
+          final da = (a.rect.center - focus.rect.center).distanceSquared;
+          final db = (b.rect.center - focus.rect.center).distanceSquared;
+          return da.compareTo(db);
+        });
+        crossScope.first.requestFocus();
+      } else if (!focus.focusInDirection(intent.direction)) {
+        stops.first.requestFocus();
+      }
       if (vertical) scheduleMicrotask(() => _fromItsStart(way));
       return;
     }
@@ -166,16 +180,8 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
     // keeping its Back/Next controls in the parent scope. Search outward
     // through the containing scopes so the d-pad can leave the list and
     // reach those controls at the visual edge.
-    final candidates = <FocusNode>{};
-    FocusScopeNode? current = scope;
-    while (current != null) {
-      candidates.addAll(current.traversalDescendants);
-      FocusNode? parent = current.parent;
-      while (parent != null && parent is! FocusScopeNode) {
-        parent = parent.parent;
-      }
-      current = parent as FocusScopeNode?;
-    }
+    final candidates = <FocusNode>{...FocusManager.instance.rootScope.descendants};
+    candidates.addAll(scope.traversalDescendants);
     final from = focus.rect;
     return [
       for (final n in candidates)
