@@ -554,13 +554,11 @@ Future<void> showKeypadMenu(BuildContext context, String title, List<KeypadMenuI
                 child: ListView(shrinkWrap: true, padding: const EdgeInsets.symmetric(vertical: 4), children: [
                   for (final (i, item) in items.indexed)
                     ListTile(
+                      focusNode: itemFocus[i],
                       dense: true,
                       leading: item.icon == null ? null : Icon(item.icon, size: 20),
                       minLeadingWidth: 20,
-                      title: Focus(
-                        focusNode: itemFocus[i],
-                        child: Text(item.label),
-                      ),
+                      title: Text(item.label),
                       trailing: item.key == null
                           ? null
                           : Text(item.key!, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
