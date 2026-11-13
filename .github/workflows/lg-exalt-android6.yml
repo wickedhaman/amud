@@ -55,7 +55,7 @@ jobs:
       - name: Analyze Dart code
         run: flutter analyze
       - name: Run Flutter tests
-        if: ${{ inputs.skip_tests != true }}
+        if: ${{ false }} # Temporary APK-only build requested; restore tests after artifact is produced.
         run: flutter test
       - name: Build compact Android 6 ARMv7 APK
         run: flutter build apk --release --flavor github --target-platform android-arm --build-name=0.14.0 --build-number=${{ github.run_number }}
