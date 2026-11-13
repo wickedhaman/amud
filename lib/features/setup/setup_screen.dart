@@ -24,6 +24,7 @@ class SetupScreen extends ConsumerStatefulWidget {
 
 class _SetupScreenState extends ConsumerState<SetupScreen> {
   final _pages = PageController();
+  final _nextFocus = FocusNode(debugLabel: 'Setup Next');
   int _page = 0;
 
   static const _count = 8;
@@ -62,6 +63,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
   @override
   void dispose() {
     _pages.dispose();
+    _nextFocus.dispose();
     super.dispose();
   }
 
@@ -119,6 +121,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                       fit: BoxFit.scaleDown,
                       alignment: AlignmentDirectional.centerEnd,
                       child: FilledButton.icon(
+                        focusNode: _nextFocus,
                         onPressed: last ? _start : () => _go(_page + 1),
                         icon: Icon(last ? Icons.check : Icons.arrow_forward),
                         label: Text(context.tr(last ? 'Start' : 'Next')),
