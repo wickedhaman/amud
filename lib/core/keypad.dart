@@ -171,9 +171,18 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
   /// put) and says it moved. Sideways, only what's beside it counts, so at
   /// the side of a list the tabs turn instead.
   static List<FocusNode> _stopsToward(FocusNode focus, TraversalDirection direction) {
-    bool focusable(FocusNode n) => n.canRequestFocus && !n.skipTraversal && n.context != null && n.context!.mounted;
-    // A page with nothing focused yet: anything on it.
-    if (focus is FocusScopeNode) return focus.traversalDescendants.where(focusable).toList();
+    bool focusable(FocusNode n) {
+      if (!n.canRequestFocus || n.skipTraversal || n.context == null || !n.context!.mounted) return false;
+      // PageView keeps neighboring pages mounted. They must not receive
+      // keypad focus while they are Offstage.
+      for (Element? e = n.context as Element?; e != null; e = e.parent) {
+        if (e.widget case Offstage(:final offstage) when offstage) return false;
+      }
+      return true;
+    }
+    // A rebuilt control can leave focus on its page scope. Search the
+    // onstage app rather than trapping navigation inside that old scope.
+    if (focus is FocusScopeNode) return FocusManager.instance.rootScope.traversalDescendants.where(focusable).toList();
     final scope = focus.nearestScope;
     if (scope == null) return const [];
     // A page may put its scrolling choices in a nested FocusScope while
