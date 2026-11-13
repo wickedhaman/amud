@@ -176,23 +176,18 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
     bool focusable(FocusNode n) => n.canRequestFocus && !n.skipTraversal && n.context != null && n.context!.mounted;
     // A page with nothing focused yet: anything on it.
     if (focus is FocusScopeNode) return focus.traversalDescendants.where(focusable).toList();
-    // Search the current scope first, then its containing scopes. This
-    // lets focus leave a nested scrolling list for its page's Back/Next
-    // controls without jumping to controls on an offstage PageView page.
+    final scope = focus.nearestScope;
+    if (scope == null) return const [];
+    // Search across nested scopes, but keep the geometric filter so focus
+    // can leave a page's scrolling choices for its Back/Next controls.
+    final candidates = <FocusNode>{...FocusManager.instance.rootScope.descendants};
+    candidates.addAll(scope.traversalDescendants);
     final from = focus.rect;
-    FocusNode? ancestor = focus.nearestScope;
-    while (ancestor != null) {
-      if (ancestor is FocusScopeNode) {
-        final stops = [
-          for (final n in ancestor.traversalDescendants)
-            if (n != focus && focusable(n) && !n.ancestors.contains(focus) && !focus.ancestors.contains(n))
-              if (_toward(n.rect, from, direction)) n,
-        ];
-        if (stops.isNotEmpty) return stops;
-      }
-      ancestor = ancestor.parent;
-    }
-    return const [];
+    return [
+      for (final n in candidates)
+        if (n != focus && focusable(n) && !n.ancestors.contains(focus) && !focus.ancestors.contains(n))
+          if (_toward(n.rect, from, direction)) n,
+    ];
   }
 
   static bool _toward(Rect r, Rect from, TraversalDirection direction) {
@@ -497,49 +492,41 @@ class KeypadMenuItem {
 /// A menu for the left soft key: a list the d-pad moves through, the first
 /// item focused. Labels are already translated.
 Future<void> showKeypadMenu(BuildContext context, String title, List<KeypadMenuItem> items) async {
-  final firstItemFocus = FocusNode(debugLabel: 'Keypad menu first item');
-  try {
-    final picked = await showDialog<KeypadMenuItem>(
-      context: context,
-      useRootNavigator: true,
-      builder: (ctx) {
-        final theme = Theme.of(ctx);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (firstItemFocus.context?.mounted ?? false) firstItemFocus.requestFocus();
-        });
-        return Dialog(
-          insetPadding: const EdgeInsets.all(8),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 360),
-            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-              ),
-              const Divider(height: 1),
-              Flexible(
-                child: ListView(shrinkWrap: true, padding: const EdgeInsets.symmetric(vertical: 4), children: [
-                  for (final (i, item) in items.indexed)
-                    ListTile(
-                      focusNode: i == 0 ? firstItemFocus : null,
-                      dense: true,
-                      leading: item.icon == null ? null : Icon(item.icon, size: 20),
-                      minLeadingWidth: 20,
-                      title: Text(item.label),
-                      trailing: item.key == null
-                          ? null
-                          : Text(item.key!, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                      onTap: () => Navigator.pop(ctx, item),
-                    ),
-                ]),
-              ),
-            ]),
-          ),
-        );
-      },
-    );
-    picked?.onSelected();
-  } finally {
-    firstItemFocus.dispose();
-  }
+  final picked = await showDialog<KeypadMenuItem>(
+    context: context,
+    useRootNavigator: true,
+    builder: (ctx) {
+      final theme = Theme.of(ctx);
+      return Dialog(
+        insetPadding: const EdgeInsets.all(8),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+            ),
+            const Divider(height: 1),
+            Flexible(
+              child: ListView(shrinkWrap: true, padding: const EdgeInsets.symmetric(vertical: 4), children: [
+                for (final (i, item) in items.indexed)
+                  ListTile(
+                    autofocus: i == 0,
+                    dense: true,
+                    leading: item.icon == null ? null : Icon(item.icon, size: 20),
+                    minLeadingWidth: 20,
+                    title: Text(item.label),
+                    trailing: item.key == null
+                        ? null
+                        : Text(item.key!, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                    onTap: () => Navigator.pop(ctx, item),
+                  ),
+              ]),
+            ),
+          ]),
+        ),
+      );
+    },
+  );
+  picked?.onSelected();
 }
