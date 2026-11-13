@@ -370,7 +370,12 @@ class _KeypadLayerState extends ConsumerState<KeypadLayer> {
             child: MediaQuery.removePadding(
               context: context,
               removeBottom: !focusMode,
-              child: _FocusRing(child: directionalApp),
+              child: _FocusRing(
+              child: Focus(
+                autofocus: true,
+                child: directionalApp,
+              ),
+            ),
             ),
           ),
           if (widget.showSoftKeys) const SoftKeyBar(),
@@ -532,12 +537,13 @@ Future<void> showKeypadMenu(BuildContext context, String title, List<KeypadMenuI
                 child: ListView(shrinkWrap: true, padding: const EdgeInsets.symmetric(vertical: 4), children: [
                   for (final (i, item) in items.indexed)
                     ListTile(
-                      focusNode: i == 0 ? firstFocus : null,
-                      autofocus: i == 0,
                       dense: true,
                       leading: item.icon == null ? null : Icon(item.icon, size: 20),
                       minLeadingWidth: 20,
-                      title: Text(item.label),
+                      title: Focus(
+                        focusNode: i == 0 ? firstFocus : null,
+                        child: Text(item.label),
+                      ),
                       trailing: item.key == null
                           ? null
                           : Text(item.key!, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
