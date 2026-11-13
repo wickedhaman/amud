@@ -128,6 +128,21 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
       return keyScroll(scrollable.position, way);
     }
     final stops = _stopsToward(focus, intent.direction);
+    // Once the page's own list reaches its edge, leave it for controls
+    // outside that list (notably the setup Back/Next row). Otherwise a
+    // long page can keep consuming d-pad presses and strand the user.
+    if (vertical && scrollable != null && !canKeyScroll(scrollable.position, way)) {
+      final outside = stops.where((n) => Scrollable.maybeOf(n.context!, axis: Axis.vertical) != scrollable).toList();
+      if (outside.isNotEmpty) {
+        outside.sort((a, b) {
+          final deltaA = way == AxisDirection.down ? a.rect.top - focus.rect.top : focus.rect.top - a.rect.top;
+          final deltaB = way == AxisDirection.down ? b.rect.top - focus.rect.top : focus.rect.top - b.rect.top;
+          return deltaA.compareTo(deltaB);
+        });
+        outside.first.requestFocus();
+        return;
+      }
+    }
     // From outside the page's list (its app bar, a button under it), into
     // the list first: Flutter goes by distance, and would pass over what's
     // in the list but not yet scrolled into view.
