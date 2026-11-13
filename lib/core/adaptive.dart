@@ -415,7 +415,7 @@ class ChoiceBar<T> extends StatelessWidget {
           onSelectionChanged: (v) => onChanged(v.first),
         );
       }
-      return Wrap(spacing: 8, runSpacing: 8, children: [
+      final chips = [
         for (final (v, label, icon) in options)
           ChoiceChip(
             avatar: icon == null ? null : Icon(icon, size: 18),
@@ -424,7 +424,14 @@ class ChoiceBar<T> extends StatelessWidget {
             showCheckmark: false,
             onSelected: (_) => onChanged(v),
           ),
-      ]);
+      ];
+      // On a narrow keypad screen, put each choice on its own row. This
+      // makes Down move to the next language in its declared order instead
+      // of jumping diagonally to a different control or a later option.
+      if (c.maxWidth < 280) {
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: chips);
+      }
+      return Wrap(spacing: 8, runSpacing: 8, children: chips);
     });
   }
 }
