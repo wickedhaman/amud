@@ -109,7 +109,32 @@ class KeyScrollAction extends Action<ScrollIntent> {
 /// - past the side edges, [onEdge] (the tabs, at a tab's first screen).
 class DirectionalOrScrollAction extends DirectionalFocusAction {
   final bool Function(TraversalDirection direction)? onEdge;
-  DirectionalOrScrollAction({this.onEdge});
+  final BuildContext? Function()? fallbackContext;
+  DirectionalOrScrollAction({this.onEdge, this.fallbackContext});
+
+  /// A route can initially leave focus on the root scope, which has no
+  /// context. In that case search the onstage app subtree for its page's
+  /// vertical scrollable so text-only pages still respond to the d-pad.
+  static ScrollableState? _fallbackScrollable(BuildContext? context) {
+    if (context == null || !context.mounted) return null;
+    ScrollableState? found;
+    void visit(Element e) {
+      if (found != null) return;
+      if (e is StatefulElement && e.state is ScrollableState) {
+        final state = e.state as ScrollableState;
+        final position = state.position;
+        if (position.axis == Axis.vertical &&
+            position.hasContentDimensions &&
+            position.maxScrollExtent > position.minScrollExtent) {
+          found = state;
+          return;
+        }
+      }
+      e.debugVisitOnstageChildren(visit);
+    }
+    (context as Element).debugVisitOnstageChildren(visit);
+    return found;
+  }
 
   @override
   void invoke(DirectionalFocusIntent intent) {
@@ -117,7 +142,7 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
     if (focus == null) return;
     final vertical = intent.direction == TraversalDirection.up || intent.direction == TraversalDirection.down;
     final way = intent.direction == TraversalDirection.down ? AxisDirection.down : AxisDirection.up;
-    final scrollable = vertical ? scrollableFor(focus) : null;
+    final scrollable = vertical ? (scrollableFor(focus) ?? _fallbackScrollable(fallbackContext?.call())) : null;
     if (scrollable != null && _overhangs(focus, scrollable, way) && canKeyScroll(scrollable.position, way)) {
       return keyScroll(scrollable.position, way);
     }
@@ -174,7 +199,18 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
             .abs().compareTo((crossB - (vertical ? focus.rect.center.dx : focus.rect.center.dy)).abs());
       });
       stops.first.requestFocus();
-      if (vertical) scheduleMicrotask(() => _fromItsStart(way));
+      if (vertical) {
+        scheduleMicrotask(() {
+          final target = primaryFocus;
+          final context = target?.context;
+          if (context != null && context.mounted) {
+            Scrollable.ensureVisible(context, alignmentPolicy: way == AxisDirection.down
+                ? ScrollPositionAlignmentPolicy.keepVisibleAtEnd
+                : ScrollPositionAlignmentPolicy.keepVisibleAtStart);
+            _fromItsStart(way);
+          }
+        });
+      }
       return;
     }
     if (scrollable != null && canKeyScroll(scrollable.position, way)) return keyScroll(scrollable.position, way);
@@ -305,7 +341,7 @@ class KeypadLayer extends ConsumerStatefulWidget {
 }
 
 class _KeypadLayerState extends ConsumerState<KeypadLayer> {
-  late final _directional = DirectionalOrScrollAction();
+  late final _directional = DirectionalOrScrollAction(fallbackContext: () => _app.currentContext);
 
   /// The app keeps its state (the pages open) when keypad navigation is
   /// turned on or off around it.
