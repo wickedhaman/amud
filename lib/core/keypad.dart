@@ -143,6 +143,18 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
     final vertical = intent.direction == TraversalDirection.up || intent.direction == TraversalDirection.down;
     final way = intent.direction == TraversalDirection.down ? AxisDirection.down : AxisDirection.up;
     final scrollable = vertical ? (scrollableFor(focus) ?? _fallbackScrollable(fallbackContext?.call())) : null;
+    // With no focusable content (a reading-only page), the app-level scope
+    // is still focused. Do not let the soft-key bar steal the first Down;
+    // scroll the page instead.
+    if (vertical && focus is FocusScopeNode && scrollable != null && canKeyScroll(scrollable.position, way)) {
+      final contentStops = FocusManager.instance.rootScope.traversalDescendants.where((n) =>
+          n.canRequestFocus &&
+          !n.skipTraversal &&
+          n.context != null &&
+          n.context!.mounted &&
+          Scrollable.maybeOf(n.context!, axis: Axis.vertical) == scrollable);
+      if (contentStops.isEmpty) return keyScroll(scrollable.position, way);
+    }
     if (scrollable != null && _overhangs(focus, scrollable, way) && canKeyScroll(scrollable.position, way)) {
       return keyScroll(scrollable.position, way);
     }
