@@ -147,13 +147,10 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
     // is still focused. Do not let the soft-key bar steal the first Down;
     // scroll the page instead.
     if (vertical && focus is FocusScopeNode && scrollable != null && canKeyScroll(scrollable.position, way)) {
-      final contentStops = FocusManager.instance.rootScope.traversalDescendants.where((n) =>
-          n.canRequestFocus &&
-          !n.skipTraversal &&
-          n.context != null &&
-          n.context!.mounted &&
-          Scrollable.maybeOf(n.context!, axis: Axis.vertical) == scrollable);
-      if (contentStops.isEmpty) return keyScroll(scrollable.position, way);
+      // A control outside the page list (for example an AppBar button)
+      // must get its normal first turn before a text-only page scrolls.
+      // If there are no focus stops anywhere in this direction, scroll.
+      if (_stopsToward(focus, intent.direction).isEmpty) return keyScroll(scrollable.position, way);
     }
     if (scrollable != null && _overhangs(focus, scrollable, way) && canKeyScroll(scrollable.position, way)) {
       return keyScroll(scrollable.position, way);
