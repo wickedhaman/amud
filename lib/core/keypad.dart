@@ -500,8 +500,8 @@ Future<void> showKeypadMenu(BuildContext context, String title, List<KeypadMenuI
       builder: (ctx) {
         final theme = Theme.of(ctx);
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (ctx.mounted && items.isNotEmpty && firstFocus.context != null) {
-            firstFocus.requestFocus();
+          if (ctx.mounted && items.isNotEmpty) {
+            FocusScope.of(ctx).requestFocus(firstFocus);
           }
         });
         return Dialog(
