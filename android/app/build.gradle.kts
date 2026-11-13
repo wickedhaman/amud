@@ -81,9 +81,15 @@ android {
 }
 
 // A Play release signed with the debug key would be rejected on upload.
+// Check the requested Gradle entry points, not every task registered for
+// every flavor. Flutter/AGP can include unrelated flavor tasks in the graph
+// for a single-flavor APK build.
 gradle.taskGraph.whenReady {
-    if (storeFilePath == null && allTasks.any { it.name.contains("PlayRelease") || it.name.contains("WearRelease") }) {
-        throw GradleException("Play releases need the upload key: set android/key.properties or SIDDUR_KEYSTORE_FILE.")
+    val requestedPlayOrWearRelease = gradle.startParameter.taskNames.any {
+        it.contains("PlayRelease") || it.contains("WearRelease")
+    }
+    if (storeFilePath == null && requestedPlayOrWearRelease) {
+        throw GradleException("Play and Wear releases need the upload key: set android/key.properties or SIDDUR_KEYSTORE_FILE.")
     }
 }
 
