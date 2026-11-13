@@ -223,7 +223,12 @@ class _ShnayimMikraScreenState extends ConsumerState<ShnayimMikraScreen> with Fo
               for (var n = 1; n <= 7; n++)
                 Padding(
                   padding: const EdgeInsetsDirectional.only(end: 6),
-                  child: Semantics(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onLongPress: () {
+                      if (!check(n)) Feedback.forLongPress(context);
+                    },
+                    child: Semantics(
                     container: true,
                     button: true,
                     selected: n == aliyah,
@@ -232,9 +237,6 @@ class _ShnayimMikraScreenState extends ConsumerState<ShnayimMikraScreen> with Fo
                         ? context.tr('Long press to mark aliyah {n} not done', {'n': n})
                         : context.tr('Long press to mark aliyah {n} done', {'n': n}),
                     onTap: () => setState(() => _aliyah = n),
-                    onLongPress: () {
-                      if (!check(n)) Feedback.forLongPress(context);
-                    },
                     child: ExcludeSemantics(
                       child: ChoiceChip(
                         showCheckmark: false,
@@ -245,6 +247,7 @@ class _ShnayimMikraScreenState extends ConsumerState<ShnayimMikraScreen> with Fo
                         selected: n == aliyah,
                         onSelected: (_) => setState(() => _aliyah = n),
                       ),
+                    ),
                     ),
                   ),
                 ),
