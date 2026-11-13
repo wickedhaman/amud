@@ -175,10 +175,15 @@ class DirectionalOrScrollAction extends DirectionalFocusAction {
       if (!n.canRequestFocus || n.skipTraversal || n.context == null || !n.context!.mounted) return false;
       // PageView keeps neighboring pages mounted. They must not receive
       // keypad focus while they are Offstage.
-      for (Element? e = n.context as Element?; e != null; e = e.parent) {
-        if (e.widget case Offstage(:final offstage) when offstage) return false;
-      }
-      return true;
+      var onstage = true;
+      (n.context! as Element).visitAncestorElements((ancestor) {
+        if (ancestor.widget case Offstage(:final offstage) when offstage) {
+          onstage = false;
+          return false;
+        }
+        return true;
+      });
+      return onstage;
     }
     // A rebuilt control can leave focus on its page scope. Search the
     // onstage app rather than trapping navigation inside that old scope.
