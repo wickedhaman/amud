@@ -237,6 +237,9 @@ class _ShnayimMikraScreenState extends ConsumerState<ShnayimMikraScreen> with Fo
                         ? context.tr('Long press to mark aliyah {n} not done', {'n': n})
                         : context.tr('Long press to mark aliyah {n} done', {'n': n}),
                     onTap: () => setState(() => _aliyah = n),
+                    onLongPress: () {
+                      if (!check(n)) Feedback.forLongPress(context);
+                    },
                     child: ExcludeSemantics(
                       child: ChoiceChip(
                         showCheckmark: false,
