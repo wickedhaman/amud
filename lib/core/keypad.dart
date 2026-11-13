@@ -511,7 +511,9 @@ class KeypadMenuItem {
 /// A menu for the left soft key: a list the d-pad moves through, the first
 /// item focused. Labels are already translated.
 Future<void> showKeypadMenu(BuildContext context, String title, List<KeypadMenuItem> items) async {
-  final firstFocus = FocusNode(debugLabel: 'First keypad menu item');
+  final itemFocus = [
+    for (var i = 0; i < items.length; i++) FocusNode(debugLabel: 'Keypad menu item $i'),
+  ];
   try {
     final picked = await showDialog<KeypadMenuItem>(
       context: context,
@@ -520,7 +522,7 @@ Future<void> showKeypadMenu(BuildContext context, String title, List<KeypadMenuI
         final theme = Theme.of(ctx);
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (ctx.mounted && items.isNotEmpty) {
-            FocusScope.of(ctx).requestFocus(firstFocus);
+            FocusScope.of(ctx).requestFocus(itemFocus.first);
           }
         });
         return Dialog(
@@ -541,7 +543,7 @@ Future<void> showKeypadMenu(BuildContext context, String title, List<KeypadMenuI
                       leading: item.icon == null ? null : Icon(item.icon, size: 20),
                       minLeadingWidth: 20,
                       title: Focus(
-                        focusNode: i == 0 ? firstFocus : null,
+                        focusNode: itemFocus[i],
                         child: Text(item.label),
                       ),
                       trailing: item.key == null
@@ -558,6 +560,8 @@ Future<void> showKeypadMenu(BuildContext context, String title, List<KeypadMenuI
     );
     picked?.onSelected();
   } finally {
-    firstFocus.dispose();
+    for (final node in itemFocus) {
+      node.dispose();
+    }
   }
 }
